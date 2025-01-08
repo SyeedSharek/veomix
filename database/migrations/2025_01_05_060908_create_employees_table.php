@@ -36,7 +36,7 @@ return new class extends Migration
             $table->string('signaturePhoto');
             $table->timestamps();
             $table->foreign('riligion_id')->references('id')->on('riligions')->onDelete('cascade');
-            $table->foreign('branch_manage_id')->references('id')->on('branch_manages')->onDelete('cascade');
+            // $table->foreign('branch_manage_id')->references('id')->on('branch_manages')->onDelete('cascade');
             $table->foreign('education_id')->references('id')->on('education')->onDelete('cascade');
             $table->foreign('designation_id')->references('id')->on('designations')->onDelete('cascade');
             $table->foreign('blood_id')->references('id')->on('blood_groups')->onDelete('cascade');

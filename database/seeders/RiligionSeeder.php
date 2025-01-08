@@ -17,7 +17,7 @@ class RiligionSeeder extends Seeder
 
         foreach ($riligious as $riligion) {
             Riligion::create([
-                'marital_status' => $riligion,
+                'riligions' => $riligion,
             ]);
         }
     }

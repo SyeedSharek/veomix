@@ -194,6 +194,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/update/branch/{id}',[BranchManageController::class,'update']);
     Route::post('/branch/list',[BranchManageController::class,'branchList']);
 
+
     // Branch Group Create
 
     Route::get('/all/branchGroups',[BranchGroupController::class,'index']);
@@ -214,6 +215,12 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/search/employee',[EmployeeController::class,'searchEmployee']);
     Route::post('/search/brach/employee',[EmployeeController::class,'getEmployeeByBranch']);
 
+
+
+
+    // Manager Name By Id Search
+
+    Route::get('/branch/employeeManagerId',[EmployeeController::class,'employeeManagerId']);
 
     // Member Manage
 

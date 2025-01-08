@@ -396,3 +396,4 @@ class MemberManageController extends Controller
     }
 
 }
+

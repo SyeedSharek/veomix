@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->unsignedBigInteger('region_id');
-            $table->string('managerName');
+            $table->unsignedBigInteger('employee_id');
             $table->date('openingDate');
             $table->unsignedBigInteger('country_id');
             $table->unsignedBigInteger('division_id');

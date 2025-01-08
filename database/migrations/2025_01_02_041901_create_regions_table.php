@@ -13,15 +13,13 @@ return new class extends Migration
     {
         Schema::create('regions', function (Blueprint $table) {
             $table->id();
-        $table->string('name');
-        $table->unsignedBigInteger('country_id');
-        $table->unsignedBigInteger('division_id');
-        $table->timestamps();
-        // Define foreign key constraints
-        $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
-        $table->foreign('division_id')->references('id')->on('divisions')->onDelete('cascade');
-
-
+            $table->string('name');
+            $table->unsignedBigInteger('country_id');
+            $table->unsignedBigInteger('division_id');
+            $table->timestamps();
+            // Define foreign key constraints
+            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
+            $table->foreign('division_id')->references('id')->on('divisions')->onDelete('cascade');
         });
     }
 

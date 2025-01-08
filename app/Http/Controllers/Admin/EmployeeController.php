@@ -387,6 +387,46 @@ class EmployeeController extends Controller
     }
 
 
+    public function managerId()
+    {
+        if (Auth::check()) {
+
+            $emplyeeManagerId = Employee::with('ManagerName')->where('designation_id','2')->get();
+            return response()->json([
+                'data' => $emplyeeManagerId
+            ]);
+
+
+
+        } else {
+            return response()->json([
+                'message' => 'Unauthorized Access',
+            ], 401);
+        }
+    }
+
+
+    public function employeeManagerId()
+    {
+        if (Auth::check()) {
+
+            $emplyeeManagerId = Employee::with('ManagerName')->where('designation_id','2')->get();
+            return response()->json([
+                'data' => $emplyeeManagerId
+            ]);
+
+
+
+        } else {
+            return response()->json([
+                'message' => 'Unauthorized Access',
+            ], 401);
+        }
+    }
+
+
+
+
 
 
 

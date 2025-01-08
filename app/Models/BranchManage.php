@@ -8,6 +8,12 @@ class BranchManage extends Model
 {
     protected $guarded = [];
 
+
+    public function employee(){
+        return $this->belongsTo(Employee::class);
+    }
+
+
     public function country(){
         return $this->belongsTo(Country::class);
     }

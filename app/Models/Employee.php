@@ -10,6 +10,13 @@ class Employee extends Model
 
     protected $appends = ['profile_photo_url', 'signature_photo_url'];
 
+
+    public function ManagerName()
+    {
+        return $this->belongsTo(Employee::class, 'designation_id');
+    }
+
+
     // Accessor for profilePhoto URL
     public function getProfilePhotoUrlAttribute()
     {
