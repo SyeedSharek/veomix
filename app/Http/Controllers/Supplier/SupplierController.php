@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class SupplierController extends Controller
 {
@@ -12,7 +15,22 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        //
+        if(Auth::check()){
+            $data = Supplier::with(['supplierGrade','branch'])->latest()->get();
+            return response()->json([
+                'message' => 'Data get successfully',
+                'data' => $data,
+            ]);
+
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
     }
 
     /**
@@ -28,8 +46,47 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if (Auth::check()) {
+            // Format the 'joingDate'
+            $formattedJoingDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->openDate)->format('Y-m-d');
+
+            // Validate the incoming request
+            $validator = Validator::make($request->all(), [
+                'supplierName' => 'required|string',
+                'proprieTorModel' => 'required|string',
+                'phoneNumber' => 'required|string',
+                'contactPersonName' => 'required|string',
+                'openDate' => 'required|date_format:d/m/Y',
+                'email' => 'required|email',
+                'webAddress' => 'string|nullable',
+                'supplierGradeId' => 'required|integer',
+                'supplierAddress' => 'required|string',
+                'branchId' => 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ], 400);
+            }
+
+
+            $data = $request->all();
+            $data['openDate'] = $formattedJoingDate;
+
+            $supplier = Supplier::create($data);
+
+            return response()->json([
+                'message' => 'Supplier created successfully',
+                'supplier' => $supplier,
+            ], 201);
+        } else {
+            return response()->json([
+                'errors' => 'Unauthorized',
+            ], 401);
+        }
     }
+
 
     /**
      * Display the specified resource.
@@ -50,16 +107,147 @@ class SupplierController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request,  $id)
     {
-        //
+        if(Auth::check()){
+            // Format the 'joingDate'
+
+            // Validate the incoming request
+            $validator = Validator::make($request->all(), [
+                'supplierName' => 'required|string',
+                'proprieTorModel' => 'required|string',
+                'phoneNumber' => 'required|string',
+                'contactPersonName' => 'required|string',
+                'openDate' => 'required|date_format:d/m/Y',
+                'email' => 'required|email',
+                'webAddress' => 'string|nullable',
+                'supplierGradeId' => 'required|integer',
+                'supplierAddress' => 'required|string',
+                'branchId' => 'required|integer',
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ], 400);
+            }
+            $formattedJoingDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->openDate)->format('Y-m-d');
+            $data = $request->all();
+            $data['openDate'] = $formattedJoingDate;
+            $supplier = Supplier::find($id);
+            if ($supplier) {
+                $supplier->update($data);
+                return response()->json([
+                   'message' => 'Supplier updated successfully',
+                   'supplier' => $supplier,
+                ]);
+            } else {
+                return response()->json([
+                   'message' => 'Supplier not found',
+                ], 404);
+            }
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy( $id)
     {
-        //
+        if(Auth::check()){
+            $supplier = Supplier::find($id);
+
+            if ($supplier) {
+                $supplier->delete();
+                return response()->json([
+                   'message' => 'Supplier deleted successfully',
+                ]);
+            } else {
+                return response()->json([
+                   'message' => 'Supplier not found',
+                ], 404);
+            }
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
     }
+
+
+    public function searchSupplier(Request $request){
+        if(Auth::check()){
+            $search = $request->input('search');
+
+            $data = Supplier::where('supplierName', 'LIKE', '%'.$search.'%')
+                ->orWhere('proprieTorModel', 'LIKE', '%'.$search.'%')
+                ->orWhere('phoneNumber', 'LIKE', '%'.$search.'%')
+                ->orWhere('contactPersonName', 'LIKE', '%'.$search.'%')
+                ->orWhere('email', 'LIKE', '%'.$search.'%')
+                ->orWhere('webAddress', 'LIKE', '%'.$search.'%')
+                ->orWhere('supplierAddress', 'LIKE', '%'.$search.'%')
+                ->with(['supplierGrade','branch'])
+                ->latest()
+                ->get();
+
+            return response()->json([
+               'message' => 'Data get successfully',
+                'data' => $data,
+            ]);
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
+    }
+
+
+    public function brachWish_search(){
+        if(Auth::check()){
+            $brand_id = request('branchId');
+
+            $data = Supplier::where('branchId', $brand_id)
+                ->with(['supplierGrade','branch'])
+                ->latest()
+                ->get();
+
+            return response()->json([
+               'message' => 'Data get successfully',
+                'data' => $data,
+            ]);
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 }

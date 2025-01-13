@@ -16,7 +16,7 @@ class ProductCategoryController extends Controller
     public function index()
     {
         if(Auth::check()){
-            $data = ProductCategory::latest()->get();
+            $data = ProductCategory::latest()->paginate(10);
             return response()->json([
                 'message' => 'All Categories',
                 'data' => $data
@@ -159,7 +159,7 @@ class ProductCategoryController extends Controller
 
             $search = $request->input('search');
 
-            $category = ProductCategory::where('categoryName', 'LIKE', '%' . $search . '%')->get();
+            $category = ProductCategory::where('categoryName', 'LIKE', '%' . $search . '%')->latest()->paginate(10);;
 
             if ($category->isEmpty()) {
                 return response()->json([

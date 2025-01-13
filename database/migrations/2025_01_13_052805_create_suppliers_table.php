@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
+            $table->string('supplierName');
+            $table->string('proprieTorModel');
+            $table->string('phoneNumber');
+            $table->string('contactPersonName');
+            $table->date('openDate');
+            $table->string('email');
+            $table->string('webAddress');
+            $table->unsignedBigInteger('supplierGrade');
+            $table->text('supplierAddress');
+            $table->unsignedBigInteger('branchId');
             $table->timestamps();
         });
     }

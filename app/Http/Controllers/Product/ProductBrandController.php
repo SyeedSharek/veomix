@@ -16,7 +16,7 @@ class ProductBrandController extends Controller
     public function index()
     {
         if (Auth::check()) {
-            $data = ProductBrand::latest()->get();
+            $data = ProductBrand::latest()->paginate(10);
             return response()->json([
                 'message' => 'Data get successfully',
                 'data' => $data

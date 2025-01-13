@@ -23,10 +23,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchGroupController;
 use App\Http\Controllers\Product\ProductBrandController;
 use App\Http\Controllers\Product\ProductCategoryController;
+use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
-
-
+use App\Http\Controllers\Supplier\SupplierController;
 
 Route::get('/cc', function() {
     $exitCode = Artisan::call('cache:clear');
@@ -254,9 +254,29 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('statusChange/productBrand/{id}',[ProductBrandController::class,'statusChange']);
     Route::post('/statusWise/search/productBrand',[ProductBrandController::class,'statusSearchProductBrand']);
 
+    // Supplier
+    Route::get('/all/supplier',[SupplierController::class,'index']);
+    Route::post('/store/supplier',[SupplierController::class,'store']);
+    Route::delete('/delete/supplier/{id}',[SupplierController::class,'destroy']);
+    Route::post('/update/supplier/{id}',[SupplierController::class,'update']);
+    Route::post('/search/supplier',[SupplierController::class,'searchSupplier']);
+    Route::post('/branch_wish/search/supplier',[SupplierController::class,'brachWish_search']);
+
+    // Product Create
+    Route::get('/all/product',[ProductController::class,'index']);
+    Route::post('/store/product',[ProductController::class,'store']);
+    Route::delete('/delete/product/{id}',[ProductController::class,'destroy']);
+    Route::post('/update/product/{id}',[ProductController::class,'update']);
+    Route::post('/search/product',[ProductController::class,'searchProduct']);
 
 
 
+
+    Route::post('/cat_branch_wish/search/product',[ProductController::class,'cat_brachWish_search']); // Caegory and brand wish search
+    Route::post('/search/product',[ProductController::class,'searchProduct']);
+
+
+    // Order Create
 
 
 

@@ -28,4 +28,12 @@ class BranchManage extends Model
     }
 
 
+    public function employees()
+{
+    return $this->hasMany(Employee::class, 'branch_manage_id');
+}
+
+
+
+
 }
