@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchGroupController;
+use App\Http\Controllers\Product\ProductBrandController;
+use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
 
@@ -231,6 +233,29 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/search/member',[MemberManageController::class,'searchMember']);
     Route::post('/search/branch/member',[MemberManageController::class,'getMemberByBranch']);
     // Route::post('/all/eye/view/{id}',[MemberManageController::class,'eyeViewDetails']);
+
+
+
+    // Product Category
+    Route::get('/all/productCategory',[ProductCategoryController::class,'index']);
+    Route::post('/store/productCategory',[ProductCategoryController::class,'store']);
+    Route::delete('/delete/productCategory/{id}',[ProductCategoryController::class,'destroy']);
+    Route::post('/update/productCategory/{id}',[ProductCategoryController::class,'update']);
+    Route::post('/search/productCategory',[ProductCategoryController::class,'searchProductCategory']);
+    Route::post('statusChange/productCategory/{id}',[ProductCategoryController::class,'statusChange']);
+
+
+    // Product Brand
+    Route::get('/all/productBrand',[ProductBrandController::class,'index']);
+    Route::post('/store/productBrand',[ProductBrandController::class,'store']);
+    Route::delete('/delete/productBrand/{id}',[ProductBrandController::class,'destroy']);
+    Route::post('/update/productBrand/{id}',[ProductBrandController::class,'update']);
+    Route::post('/search/productBrand',[ProductBrandController::class,'searchProductBrand']);
+    Route::post('statusChange/productBrand/{id}',[ProductBrandController::class,'statusChange']);
+    Route::post('/statusWise/search/productBrand',[ProductBrandController::class,'statusSearchProductBrand']);
+
+
+
 
 
 
