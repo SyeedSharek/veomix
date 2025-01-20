@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('wholeSale_price');
             $table->string('tax_rate');
             $table->string('loan_price');
+            $table->string('barcode');
             $table->unsignedBigInteger('discountType_id');
             $table->string('discount_percentage');
             $table->string('discountAmount');

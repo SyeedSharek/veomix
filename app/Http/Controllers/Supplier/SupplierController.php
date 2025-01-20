@@ -48,6 +48,10 @@ class SupplierController extends Controller
     {
         if (Auth::check()) {
             // Format the 'joingDate'
+
+            $supplierId = random_int(100000, 999999);
+            // dd($supplierId);
+
             $formattedJoingDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->openDate)->format('Y-m-d');
 
             // Validate the incoming request
@@ -73,6 +77,7 @@ class SupplierController extends Controller
 
             $data = $request->all();
             $data['openDate'] = $formattedJoingDate;
+            $data['supplierId'] = $supplierId;
 
             $supplier = Supplier::create($data);
 
@@ -131,8 +136,9 @@ class SupplierController extends Controller
                 ], 400);
             }
             $formattedJoingDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->openDate)->format('Y-m-d');
-            $data = $request->all();
             $data['openDate'] = $formattedJoingDate;
+            $data = $request->all();
+
             $supplier = Supplier::find($id);
             if ($supplier) {
                 $supplier->update($data);
@@ -230,6 +236,61 @@ class SupplierController extends Controller
                'message' => 'Data get successfully',
                 'data' => $data,
             ]);
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
+    }
+
+
+    public function supplierListSearch(){
+
+        if(Auth::check()){
+            $supplierGrade_id = request('supplierGradeId');
+            $supplierName = request('supplierName');
+            $supplierId = request('supplierId');
+            $mobile = request('mobile');
+            $contactPersonName = request('contactPersonName');
+            $email = request('email');
+
+
+            $data = Supplier::where(function ($query) use ($supplierGrade_id, $supplierName, $supplierId, $mobile, $contactPersonName,$email) {
+                if (!empty($supplierName)) {
+                    $query->Where('supplierName', 'LIKE', '%' . $supplierName . '%');
+                }
+                if (!empty($supplierId)) {
+                    $query->Where('supplierId', 'LIKE', '%' . $supplierId . '%');
+                }
+                if (!empty($mobile)) {
+                    $query->Where('phoneNumber', 'LIKE', '%' . $mobile . '%');
+                }
+                if (!empty($contactPersonName)) {
+                    $query->Where('contactPersonName', 'LIKE', '%' . $contactPersonName . '%');
+                }
+                if (!empty($email)) {
+                    $query->Where('email', 'LIKE', '%' . $email . '%');
+                }
+
+                if (!empty($supplierGrade_id)) {
+                    $query->Where('supplierGradeId', $supplierGrade_id);
+                }
+
+            })
+                ->with(['supplierGrade'])
+                ->latest()
+                ->paginate(10);
+
+
+                return response()->json([
+                    'message' => 'Data retrieved successfully',
+                    'status' => true,
+                    'data' => $data,
+                ], 200);
 
         }
         else{

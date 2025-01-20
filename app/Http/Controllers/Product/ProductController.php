@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Nette\Utils\Random;
 
 class ProductController extends Controller
 {
@@ -15,18 +16,17 @@ class ProductController extends Controller
      */
     public function index()
     {
-        if(Auth::check()){
-            $data = Product::with(['productCategory','productBrand','productDiscountType'])->latest()->paginate(10);
+        if (Auth::check()) {
+            $data = Product::with(['productCategory', 'productBrand', 'productDiscountType'])->latest()->paginate(10);
             return response()->json([
-               'message' => 'Data get successfully',
-               'status' => true,
-               'data' => $data
+                'message' => 'Data get successfully',
+                'status' => true,
+                'data' => $data
             ], 200);
-
-        }else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized Access',
-               'status' => false
+                'message' => 'Unauthorized Access',
+                'status' => false
             ], 401);
         }
     }
@@ -44,8 +44,13 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        if(Auth::check()){
-            $validator = Validator::make($request->all(),[
+        if (Auth::check()) {
+
+            $barcode = random_int(10000, 99999);
+            // dd($barcode);
+
+
+            $validator = Validator::make($request->all(), [
                 'productName' => 'required|string',
                 'productModel' => 'required|string',
                 'category_id' => 'required|integer',
@@ -65,29 +70,27 @@ class ProductController extends Controller
                 'productDescription' => 'required',
 
             ]);
-            if($validator->fails()){
+            if ($validator->fails()) {
                 return response()->json([
-                   'message' => $validator->errors(),
+                    'message' => $validator->errors(),
                 ], 400);
             }
 
             $request->merge([
                 'discountFormDate' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->discountFormDate)->format('Y-m-d'),
                 'discountUpToDate' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->discountUpToDate)->format('Y-m-d'),
+                'barcode' => $barcode,
             ]);
 
             $product = Product::create($request->all());
 
             return response()->json([
-               'message' => 'Data stored successfully!!',
+                'message' => 'Data stored successfully!!',
                 'data' => $product,
             ]);
-
-
-
-        }else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized',
+                'message' => 'Unauthorized',
             ], 401);
         }
     }
@@ -113,14 +116,15 @@ class ProductController extends Controller
      */
     public function update(Request $request,  $id)
     {
-        if(Auth::check()){
-            $validator = Validator::make($request->all(),[
+        if (Auth::check()) {
+            $validator = Validator::make($request->all(), [
                 'productName' => 'required|string',
                 'productModel' => 'required|string',
                 'category_id' => 'required|integer',
                 'brand_id' => 'required|integer',
                 'purchase_price' => 'required|string',
                 'sales_price' => 'required|string',
+                'barcode' => 'required|string',
                 'wholeSale_price' => 'required|string',
                 'tax_rate' => 'required|string',
                 'loan_price' => 'required|string',
@@ -136,9 +140,9 @@ class ProductController extends Controller
 
             ]);
 
-            if($validator->fails()){
+            if ($validator->fails()) {
                 return response()->json([
-                   'message' => $validator->errors(),
+                    'message' => $validator->errors(),
                 ], 400);
             }
 
@@ -149,13 +153,12 @@ class ProductController extends Controller
             $product = Product::find($id);
             $product->update($request->all());
             return response()->json([
-               'message' => 'Data updated successfully!!',
+                'message' => 'Data updated successfully!!',
                 'data' => $product,
             ]);
-    }
-        else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized',
+                'message' => 'Unauthorized',
             ], 401);
         }
     }
@@ -165,68 +168,134 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        if(Auth::check()){
+        if (Auth::check()) {
             $product = Product::find($id);
             $product->delete();
 
             return response()->json([
-               'message' => 'Data deleted successfully!!',
+                'message' => 'Data deleted successfully!!',
             ]);
-
-        }
-        else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized',
+                'message' => 'Unauthorized',
             ], 401);
         }
     }
 
-    public function searchProduct(){
-        if(Auth::check()){
+    public function searchProduct()
+    {
+        if (Auth::check()) {
             $search = request('search');
-            $data = Product::where('productName', 'LIKE', '%'.$search.'%')
-                ->orWhere('productModel', 'LIKE', '%'.$search.'%')
-                ->orWhere('purchase_price', 'LIKE', '%'.$search.'%')
-                ->orWhere('productType', 'LIKE', '%'.$search.'%')
-                ->with(['productCategory','productBrand','productDiscountType'])
+            $data = Product::where('productName', 'LIKE', '%' . $search . '%')
+                ->orWhere('productModel', 'LIKE', '%' . $search . '%')
+                ->orWhere('purchase_price', 'LIKE', '%' . $search . '%')
+                ->orWhere('productType', 'LIKE', '%' . $search . '%')
+                ->with(['productCategory', 'productBrand', 'productDiscountType'])
                 ->latest()->paginate(10);
 
             return response()->json([
-               'message' => 'Data get successfully',
-               'status' => true,
-               'data' => $data
+                'message' => 'Data get successfully',
+                'status' => true,
+                'data' => $data
             ], 200);
-        }else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized Access',
-               'status' => false
+                'message' => 'Unauthorized Access',
+                'status' => false
             ], 401);
         }
     }
 
 
 
-    public function cat_brachWish_search(){
-        if(Auth::check()){
+    public function cat_brachWish_search()
+    {
+        if (Auth::check()) {
             $category = request('category_id');
             $brand = request('brand_id');
 
             $data = Product::where('category_id', $category)
-                ->orWhere('brand_id',$brand)
-                ->with(['productCategory','productBrand','productDiscountType'])
+                ->orWhere('brand_id', $brand)
+                ->with(['productCategory', 'productBrand', 'productDiscountType'])
                 ->latest()->paginate(10);
 
-                return response()->json([
-                    'products' => $data,
-
-                ]);
-
-        }
-        else{
             return response()->json([
-               'message' => 'Unauthorized Access',
-               'status' => false
+                'products' => $data,
+
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Unauthorized Access',
+                'status' => false
             ], 401);
         }
     }
+
+
+    // public function listProduct(){
+    //     if(Auth::check()){
+    //         $data = Product::with(['productCategory','productBrand','productDiscountType'])->latest()->paginate(10);
+    //         return response()->json([
+    //            'message' => 'Data get successfully',
+    //            'status' => true,
+    //            'data' => $data
+    //         ], 200);
+
+    //     }
+    //     else{
+    //         return response()->json([
+    //            'message' => 'Unauthorized Access',
+    //            'status' => false
+    //         ], 401);
+    //     }
+    // }
+
+    public function productSearchList()
+    {
+        if (Auth::check()) {
+            $productName = request('productName');
+            $productModel = request('productModel');
+            $barcode = request('barcode');
+            $category = request('category_id');
+            $brand = request('brand_id');
+
+            $data = Product::where(function ($query) use ($productName, $productModel, $barcode, $category, $brand) {
+                if (!empty($productName)) {
+                    $query->Where('productName', 'LIKE', '%' . $productName . '%');
+                }
+                if (!empty($productModel)) {
+                    $query->Where('productModel', 'LIKE', '%' . $productModel . '%');
+                }
+                if (!empty($barcode)) {
+                    $query->Where('barcode', 'LIKE', '%' . $barcode . '%');
+                }
+                if (!empty($category)) {
+                    $query->Where('category_id', $category);
+                }
+                if (!empty($brand)) {
+                    $query->Where('brand_id', $brand);
+                }
+            })
+                ->with(['productCategory', 'productBrand'])
+                ->latest()
+                ->paginate(10);
+
+            return response()->json([
+                'message' => 'Data retrieved successfully',
+                'status' => true,
+                'data' => $data,
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Unauthorized Access',
+                'status' => false,
+            ], 401);
+        }
+    }
+
+
+
+
+
+
 }

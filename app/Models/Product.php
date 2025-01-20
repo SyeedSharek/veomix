@@ -16,6 +16,7 @@ class Product extends Model
                 'wholeSale_price' ,
                 'tax_rate' ,
                 'loan_price' ,
+                'barcode',
                 'discountType_id',
                 'discount_percentage' ,
                 'discountAmount' ,

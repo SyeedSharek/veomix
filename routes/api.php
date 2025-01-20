@@ -27,6 +27,7 @@ use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\Supplier\SupplierController;
+use App\Http\Controllers\WholeSalesController;
 
 Route::get('/cc', function() {
     $exitCode = Artisan::call('cache:clear');
@@ -254,20 +255,22 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('statusChange/productBrand/{id}',[ProductBrandController::class,'statusChange']);
     Route::post('/statusWise/search/productBrand',[ProductBrandController::class,'statusSearchProductBrand']);
 
-    // Supplier
+    // Supplier Route
     Route::get('/all/supplier',[SupplierController::class,'index']);
     Route::post('/store/supplier',[SupplierController::class,'store']);
     Route::delete('/delete/supplier/{id}',[SupplierController::class,'destroy']);
     Route::post('/update/supplier/{id}',[SupplierController::class,'update']);
     Route::post('/search/supplier',[SupplierController::class,'searchSupplier']);
     Route::post('/branch_wish/search/supplier',[SupplierController::class,'brachWish_search']);
+    Route::post('/search/supplierList',[SupplierController::class,'supplierListSearch']); // Supplier List Search
 
-    // Product Create
+    // Product Route
     Route::get('/all/product',[ProductController::class,'index']);
     Route::post('/store/product',[ProductController::class,'store']);
     Route::delete('/delete/product/{id}',[ProductController::class,'destroy']);
     Route::post('/update/product/{id}',[ProductController::class,'update']);
     Route::post('/search/product',[ProductController::class,'searchProduct']);
+    Route::post('/search/productList',[ProductController::class,'productSearchList']); // All Product List Search
 
 
 
@@ -276,7 +279,16 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/search/product',[ProductController::class,'searchProduct']);
 
 
-    // Order Create
+    // Whole  Sales Route
+
+    Route::get('/show/all/wholeSales',[WholeSalesController::class,'index']);
+    Route::post('/store/wholeSales',[WholeSalesController::class,'store']);
+    Route::delete('/delete/wholeSales/{id}',[WholeSalesController::class,'destroy']);
+    Route::post('/update/wholeSales/{id}',[WholeSalesController::class,'update']);
+    Route::post('/search/wholeSales',[WholeSalesController::class,'wholeSaleSearch']);
+    Route::post('/search/clientGrade',[WholeSalesController::class,'clientWiseGradeSearch']);
+
+
 
 
 
