@@ -11,20 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('whole_sales', function (Blueprint $table) {
+        Schema::create('distributors', function (Blueprint $table) {
             $table->id();
-            $table->string('clientName');
+            $table->string('distributorName');
+            $table->string('distributorId');
             $table->string('proprietorName');
             $table->string('phoneNumber');
             $table->string('contactPersonName');
-            $table->string('clientId');
             $table->date('openDate');
             $table->string('email');
             $table->string('webAddress');
-            $table->unsignedBigInteger('clientGrade_Id');
-            $table->text('clientAddress');
+            $table->unsignedBigInteger('distributorGrade');
+            $table->text('distributorAddress');
             $table->timestamps();
-            $table->foreign('clientGrade_Id')->references('id')->on('client_grades')->onDelete('cascade');
+            $table->foreign('distributorGrade')->references('id')->on('distributor_grades')->onDelete('cascade');
         });
     }
 
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('whole_sales');
+        Schema::dropIfExists('distributors');
     }
 };

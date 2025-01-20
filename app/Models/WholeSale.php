@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class WholeSale extends Model
 {
     protected $fillable = ['id','clientName','proprietorName',
-    'contactPersonName','openDate',
+    'contactPersonName','openDate','clientId','phoneNumber',
     'email','webAddress','clientGrade_Id',
     'clientAddress'];
 

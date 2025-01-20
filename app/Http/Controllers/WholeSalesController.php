@@ -14,8 +14,9 @@ class WholeSalesController extends Controller
      */
     public function index()
     {
+
         if (Auth::check()) {
-            $wholeSales = WholeSale::with(['clientGrade'])->latest()->get();
+            $wholeSales = WholeSale::with(['clientGrade'])->latest()->paginate(10);
             return response()->json([
                 'message' => 'Data get successfully',
                 'data' => $wholeSales,
@@ -42,10 +43,12 @@ class WholeSalesController extends Controller
     {
         if (Auth::check()) {
 
+
             $validator = Validator::make($request->all(), [
                 'clientName' => 'required|string',
                 'proprietorName' => 'required|string',
                 'contactPersonName' => 'required|string',
+                'phoneNumber' => 'required|string',
                 'openDate' => 'required|date_format:d/m/Y',
                 'email' => 'required|email',
                 'webAddress' => 'required|string',
@@ -59,10 +62,14 @@ class WholeSalesController extends Controller
                     'errors' => $validator->errors(),
                 ]);
             }
+            $clientId = random_int(10000, 99999);
+            // dd($clientId);
 
             $formattedopenDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->openDate)->format('Y-m-d');
             $data = $request->all();
             $data['openDate'] = $formattedopenDate;
+            $data['clientId'] = $clientId;
+
             $wholeSale = WholeSale::create($data);
             return response()->json([
                 'message' => 'Data stored successfully!!',
@@ -103,6 +110,7 @@ class WholeSalesController extends Controller
                     'clientName' => 'required|string',
                     'proprietorName' => 'required|string',
                     'contactPersonName' => 'required|string',
+                    'phoneNumber' => 'required|string',
                     'openDate' => 'required|date_format:d/m/Y',
                     'email' => 'required|email',
                     'webAddress' => 'required|string',
@@ -175,7 +183,7 @@ class WholeSalesController extends Controller
                             ->orWhere('webAddress', 'like', '%'.$search.'%')
                             ->orWhere('clientAddress', 'like', '%'.$search.'%')
                             ->latest()
-                            ->get();
+                            ->paginate(10);
 
             return response()->json([
                 'data' => $wholeSales,
@@ -209,6 +217,56 @@ class WholeSalesController extends Controller
             ], 401);
         }
     }
+
+    public function clientList(){
+
+        if(Auth::check()){
+            $clientName = request('clientName');
+            $clientId = request('clientId');
+            $mobile = request('phoneNumber');
+            $clientGradeId = request('clientGradeId');
+
+
+
+            $data = WholeSale::where(function ($query) use ($clientName, $clientId, $mobile, $clientGradeId) {
+                if (!empty($clientName)) {
+                    $query->Where('clientName', 'LIKE', '%' . $clientName . '%');
+                }
+                if (!empty($clientId)) {
+                    $query->Where('clientId', 'LIKE', '%' . $clientId . '%' );
+                }
+                if (!empty($mobile)) {
+                    $query->Where('phoneNumber', 'LIKE', '%' . $mobile . '%');
+                }
+                if (!empty($clientGradeId)) {
+                    $query->Where('clientGrade_Id',  $clientGradeId );
+                }
+
+
+                 })
+                ->with(['clientGrade'])
+                ->latest()
+                ->paginate(10);
+
+
+                return response()->json([
+                    'message' => 'Data retrieved successfully',
+                    'status' => true,
+                    'data' => $data,
+                ], 200);
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
+
+    }
+
+
 
 
 

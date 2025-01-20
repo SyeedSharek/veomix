@@ -21,13 +21,16 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchGroupController;
+use App\Http\Controllers\Distributor\DistributorController;
 use App\Http\Controllers\Product\ProductBrandController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\productWarranty\ProductWarrantyController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\Supplier\SupplierController;
 use App\Http\Controllers\WholeSalesController;
+
 
 Route::get('/cc', function() {
     $exitCode = Artisan::call('cache:clear');
@@ -285,12 +288,50 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/store/wholeSales',[WholeSalesController::class,'store']);
     Route::delete('/delete/wholeSales/{id}',[WholeSalesController::class,'destroy']);
     Route::post('/update/wholeSales/{id}',[WholeSalesController::class,'update']);
+    // whole search
     Route::post('/search/wholeSales',[WholeSalesController::class,'wholeSaleSearch']);
     Route::post('/search/clientGrade',[WholeSalesController::class,'clientWiseGradeSearch']);
 
+    // Whole search client List
+    Route::post('/search/client/list',[WholeSalesController::class,'clientList']);
 
 
 
+    // Distributor Route
+
+    Route::get('/show/all/distributors',[DistributorController::class,'index']);
+    Route::post('/store/distributor',[DistributorController::class,'store']);
+    Route::delete('/delete/distributor/{id}',[DistributorController::class,'destroy']);
+    Route::post('/update/distributor/{id}',[DistributorController::class,'update']);
+
+    //distributor search
+
+    Route::post('/search/distributor',[DistributorController::class,'distributorSearch']);
+    Route::post('/search/distributor/grade',[DistributorController::class,'distributeWiseSearch']);
+
+    // distributor list
+    Route::post('/search/distributor/list',[DistributorController::class,'distributorList']);
+
+
+
+    // Product Warranty
+
+    Route::get('/show/product/warrenty',[ProductWarrantyController::class,'index']);
+    Route::post('/store/product/warrenty',[ProductWarrantyController::class,'store']);
+    Route::delete('/delete/product/warrenty/{id}',[ProductWarrantyController::class,'destroy']);
+    Route::post('/update/product/warrenty/{id}',[ProductWarrantyController::class,'update']);
+
+    // product warranty search
+    Route::post('/search/warrent',[ProductWarrantyController::class,'warrentySearch']);
+    Route::post('/search/productWise',[ProductWarrantyController::class,'productWishSearchh']);
+
+
+
+
+    // Only Product, Category , Brand  Show api
+    Route::get('/product/show',[ProductWarrantyController::class,'productDetails']);
+    Route::get('/category/show',[ProductWarrantyController::class,'categoryDetails']);
+    Route::get('/brand/show',[ProductWarrantyController::class,'brandDetails']);
 
 
 
