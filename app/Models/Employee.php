@@ -41,6 +41,8 @@ class Employee extends Model
         return $this->belongsTo(BranchManage::class, 'branch_manage_id');
     }
 
+   
+
 
 
 

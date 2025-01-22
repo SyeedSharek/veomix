@@ -427,6 +427,22 @@ class EmployeeController extends Controller
 
 
 
+    public function showEmployee($employee_id){
+        if (Auth::check()) {
+            $employee = Employee::find($employee_id);
+
+
+            return response()->json([
+                'data' => $employee
+            ]);
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthenticated',
+            ], 401);
+        }
+    }
+
 
 
 

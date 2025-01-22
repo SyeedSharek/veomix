@@ -162,9 +162,21 @@ class BranchManageController extends Controller
         }
     }
 
-    public function branchSearch(Request $request)
+    public function bracnchSearch(Request $request)
     {
         if (Auth::check()) {
+            $search = $request->input('search');
+
+            $branchManage = BranchManage::where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('managerPhone', 'LIKE', "%{$search}%")
+                            ->orWhere('openingDate', 'LIKE', "%{$search}%")
+                            ->latest()
+                            ->paginate(10);
+
+            return response()->json([
+                'message' => 'Data get successfully',
+                'data' => $branchManage,
+            ]);
         } else {
             return response()->json([
                 'message' => 'Unauthorized Access',

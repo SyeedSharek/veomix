@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Regionaloffice;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class RegionalofficeController extends Controller
@@ -14,11 +15,18 @@ class RegionalofficeController extends Controller
      */
     public function index()
     {
-        $data = Regionaloffice::latest()->get();
-        return response()->json([
-            'message' => 'Data get successfully',
-            'data' => $data,
-        ]);
+        if (Auth::check()) {
+            $data = Regionaloffice::with('divisionOffice', 'country', 'district', 'region')->latest()->paginate(10);
+
+            return response()->json([
+                'message' => 'Data get successfully',
+                'data' => $data,
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
     }
 
     /**
@@ -35,15 +43,14 @@ class RegionalofficeController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'office_name' => 'required|string|max:255|unique:regionaloffices,office_name',
+            'regionalOfficeName' => 'required|string',
             'divisionoffice_id' => 'required|integer|exists:divisionoffices,id',
-            'division_id' => 'required|integer|exists:divisions,id',
-            'opening_date' => 'required|date',
+            'opening_date' => 'required|date_format:d/m/Y',
             'country_id' => 'required|integer|exists:countries,id',
             'district_id' => 'required|integer|exists:districts,id',
-            'upazila_id' => 'required|integer|exists:upazilas,id',
-            'union_id' => 'required|integer|exists:unions,id',
-            'employee_phone' => 'required|string|min:11|max:20|exists:divisionoffices,employee_phone',
+            'regional_id' => 'required|integer|exists:regions,id',
+            'upozila' => 'required|string',
+            'union' => 'required|string',
             'address' => 'required|string',
             'status' => 'required|boolean',
         ]);
@@ -55,7 +62,9 @@ class RegionalofficeController extends Controller
             ], 422);
         }
 
+        $formattedopenDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->opening_date)->format('Y-m-d');
         $data = $request->all();
+        $data['opening_date'] = $formattedopenDate;
 
         $store_data = Regionaloffice::create($data);
 
@@ -81,22 +90,19 @@ class RegionalofficeController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Regionaloffice $regionaloffice)
+
+    public function update(Request $request, $riginalOffice_id)
     {
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
-            'office_name' => 'required|string|max:255|unique:regionaloffices,office_name,' . $regionaloffice->id,
+            'regionalOfficeName' => 'required|string',
             'divisionoffice_id' => 'required|integer|exists:divisionoffices,id',
-            'division_id' => 'required|integer|exists:divisions,id',
-            'opening_date' => 'required|date',
+            'opening_date' => 'required|date_format:d/m/Y',
             'country_id' => 'required|integer|exists:countries,id',
             'district_id' => 'required|integer|exists:districts,id',
-            'upazila_id' => 'required|integer|exists:upazilas,id',
-            'union_id' => 'required|integer|exists:unions,id',
-            'employee_phone' => 'required|string|min:11|max:20|exists:divisionoffices,employee_phone',
+            'regional_id' => 'required|integer|exists:regions,id',
+            'upozila' => 'required|string',
+            'union' => 'required|string',
             'address' => 'required|string',
             'status' => 'required|boolean',
         ]);
@@ -109,24 +115,175 @@ class RegionalofficeController extends Controller
             ], 422);
         }
 
-        // Update the divisionoffice record with the validated data
-        $regionaloffice->update($request->all());
+        // Find the regional office
+        $rigionalOffice = Regionaloffice::find($riginalOffice_id);
 
-        // Return the updated division office data
+        $formattedopenDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->opening_date)->format('Y-m-d');
+
+        $data = $request->all();
+        $data['opening_date'] = $formattedopenDate;
+
+        $rigionalOffice->update($data);
+
+
         return response()->json([
             'message' => 'Data updated successfully!!',
-            'data' => $regionaloffice,
+            'data' => $rigionalOffice,
         ]);
     }
+
+
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Regionaloffice $regionaloffice)
+    public function destroy($rigionalOffice_id)
     {
-        $regionaloffice->delete();
-        return response()->json([
-            'message' => 'Data deleted successfully!!',
-        ]);
-    }
+        if(Auth::check()){
+            $rigionalOffice = Regionaloffice::find($rigionalOffice_id);
+            $rigionalOffice->delete();        }
+        else{
+            return response()->json([
+                'errors' => 'Unauthorized',
+            ]);
+        }
+
+
+
+
+     }
+
+
+     public function searchRigionalOffice(){
+        if(Auth::check()){
+            $search = request('search');
+            $data = Regionaloffice::where('regionalOfficeName', 'LIKE', '%'. $search. '%')
+            ->orWhere('opening_date', 'LIKE', '%'. $search. '%')
+            ->with('divisionOffice', 'country', 'district','region')
+            ->latest()
+            ->paginate(10);
+
+            return response()->json([
+                'data' => $data,
+            ]);
+
+        }
+        else{
+            return response()->json([
+                'errors' => 'Unauthorized',
+            ],400);
+
+        }
+     }
+
+
+
+     public function divisionWishSearch($division_id){
+        if(Auth::check()){
+            $manager_details  = Regionaloffice::where('divisionoffice_id', $division_id)->with('divisionOffice','country','district')->paginate(10);
+
+            return response()->json([
+               'message' => 'Data found successfully',
+                'data' => $manager_details,
+            ]);
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthenticated',
+            ], 401);
+        }
+     }
+
+
+
+     public function rigionalList(){
+        if(Auth::check()){
+
+            $regional_id = request('regional_id');
+            $managerName_id = request('managerName_id');
+            $opening_date = request('opening_date');
+            $status = request('status');
+            $country_id = request('country_id');
+            $district_id = request('district_id');
+            $upozila = request('upozila');
+
+
+
+
+            $data = Regionaloffice::where(function ($query) use ($regional_id, $managerName_id, $opening_date, $status,$country_id,$district_id,$upozila) {
+                if (!empty($regional_id)) {
+                    $query->Where('manager_id',  $regional_id );
+                }
+                if (!empty($managerName_id)) {
+                    $query->Where('country_id',  $managerName_id );
+                }
+                if (!empty($division_id)) {
+                    $query->Where('division_id',  $division_id );
+                }
+                if (!empty($country_id)) {
+                    $query->Where('division_id',  $country_id );
+                }
+                if (!empty($district_id)) {
+                    $query->Where('district_id',  $district_id );
+                }
+                if (!empty($upozila)) {
+                    $query->Where('upazila',  'LIKE', '%' . $upozila . '%' );
+                }
+
+                if (!empty($opening_date)) {
+                    $query->Where('opening_date', 'LIKE', '%' . $opening_date . '%' );
+                }
+                if (!empty($status)) {
+                    $query->Where('status',  $status );
+                }
+
+
+                 })
+                ->with(['managerName'])
+                ->latest()
+                ->paginate(10);
+
+
+                return response()->json([
+                    'message' => 'Data retrieved successfully',
+                    'status' => true,
+                    'data' => $data,
+                ], 200);
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
+     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

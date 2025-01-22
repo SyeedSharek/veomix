@@ -13,18 +13,21 @@ return new class extends Migration
     {
         Schema::create('regionaloffices', function (Blueprint $table) {
             $table->id();
-            $table->string('office_name');
+            $table->string('regionalName');
             $table->unsignedBigInteger('divisionoffice_id');
-            $table->unsignedBigInteger('division_id');
             $table->date('opening_date');
             $table->unsignedBigInteger('country_id');
             $table->unsignedBigInteger('district_id');
-            $table->unsignedBigInteger('upazila_id');
-            $table->unsignedBigInteger('union_id');
-            $table->string('employee_phone');
+            $table->unsignedBigInteger('regional_id');
+            $table->string('upozila');
+            $table->string('union_id');
             $table->text('address');
             $table->boolean('status')->default(0);
             $table->timestamps();
+            $table->foreign('divisionoffice_id')->references('id')->on('divisionoffices')->onDelete('cascade');
+            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
+            $table->foreign('district_id')->references('id')->on('districts')->onDelete('cascade');
+            $table->foreign('regional_id')->references('id')->on('regions')->onDelete('cascade');
         });
     }
 

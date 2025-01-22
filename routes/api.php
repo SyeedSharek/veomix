@@ -26,6 +26,7 @@ use App\Http\Controllers\Product\ProductBrandController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\productWarranty\ProductWarrantyController;
+use App\Http\Controllers\productWarranty\WarrantyCreateController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\Supplier\SupplierController;
@@ -125,6 +126,9 @@ Route::prefix('v1')->group(function () {
     Route::get('get-available-managers', [BackendController::class, 'getAvailableManager']);
 
 
+
+
+
 });
 
 
@@ -149,6 +153,15 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/all/roles',[RoleController::class,'allrole']);
     Route::get('/all/permisisions',[RoleController::class,'allpermisisions']);
     Route::post('/add/role',[RoleController::class,'addRole']);
+
+
+    // For Frontend Api
+    Route::get('/employee/show/{employee_id}',[EmployeeController::class,'showEmployee']);
+    Route::get('/division/office/show/{divisionOffice_id}',[DivisionOfficeController::class,'showDivisionOffice']);
+
+
+
+
 
     //  Country
     Route::get('/all/countries',[CountryController::class,'index']);
@@ -192,6 +205,38 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/update/education/{id}',[EducationController::class,'update']);
 
 
+    // Division Office Management
+
+
+    Route::get('/all/divisionOffice',[DivisionofficeController::class,'index']);
+    Route::post('/store/divisionOffice',[DivisionofficeController::class,'store']);
+    Route::delete('/delete/divisionOffice/{divisionoffice}',[DivisionofficeController::class,'destroy']);
+    Route::post('/update/divisionOffice/{division_id}',[DivisionofficeController::class,'update']);
+
+    //Division Office Search
+
+    Route::post('/divisionOffice/list',[DivisionofficeController::class,'divisionList']);
+    Route::post('/search/divisionOffice/all',[DivisionofficeController::class,'searchDevisions']);
+    Route::get('/search/managerNameWise/{employee_Id}',[DivisionofficeController::class,'searchManagerName']);
+
+
+
+    // Regional Office Management
+
+    Route::get('/all/rigionalOffice',[RegionalofficeController::class,'index']);
+    Route::post('/store/rigionalOffice',[RegionalofficeController::class,'store']);
+    Route::delete('/delete/rigionalOffice/{rigionalOffice_id}',[RegionalofficeController::class,'destroy']);
+    Route::post('/update/rigionalOffice/{riginalOffice_id}',[RegionalofficeController::class,'update']);
+
+    // Regional Office Search
+
+    Route::post('/rigionalOffice/list',[RegionalofficeController::class,'rigionalList']);
+    Route::post('/search/rigionalOffice/all',[RegionalofficeController::class,'searchRigionalOffice']);
+    Route::get('/search/rigionalOffice/{division_id}',[RegionalofficeController::class,'divisionWishSearch']);
+
+
+
+
     // Branch Manage
 
     Route::get('/all/branch',[BranchManageController::class,'index']);
@@ -199,6 +244,9 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::delete('/delete/branch/{id}',[BranchManageController::class,'destroy']);
     Route::post('/update/branch/{id}',[BranchManageController::class,'update']);
     Route::post('/branch/list',[BranchManageController::class,'branchList']);
+
+    // Breanch Search
+    Route::post('/search/bracnchSearch/all',[BranchManageController::class,'bracnchSearch']);
 
 
     // Branch Group Create
@@ -314,7 +362,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
 
 
 
-    // Product Warranty
+    // Product Warranty Setup
 
     Route::get('/show/product/warrenty',[ProductWarrantyController::class,'index']);
     Route::post('/store/product/warrenty',[ProductWarrantyController::class,'store']);
@@ -332,6 +380,11 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/product/show',[ProductWarrantyController::class,'productDetails']);
     Route::get('/category/show',[ProductWarrantyController::class,'categoryDetails']);
     Route::get('/brand/show',[ProductWarrantyController::class,'brandDetails']);
+
+
+
+    // Product Warranty Create
+    Route::get('/member/details/{member_Id}',[WarrantyCreateController::class,'memberDetails']);
 
 
 
