@@ -23,7 +23,7 @@ class EmployeeController extends Controller
     public function index()
     {
         if (Auth::check()) {
-            $data = Employee::with(['designation','branchName'])->latest()->get();
+            $data = Employee::with(['designation','branchName','maritalStatus','gender','religion','education','bloodGroup'])->latest()->paginate(10);
 
             return response()->json([
                 'message' => 'Data retrieved successfully',
@@ -130,7 +130,7 @@ class EmployeeController extends Controller
                 'nationalId' =>'required',
                 'dateOfBirth' => 'required|date',
                 'riligion_id' =>'required',
-                'branch_manage_id' =>'required|integer',
+                'branch_manage_id' =>'nullable',
                 'education_id' =>'required|integer',
                 'designation_id' =>'required|integer',
                 'blood_id' =>'required|integer',
@@ -236,27 +236,27 @@ class EmployeeController extends Controller
 
             // Validate the inputs
             $validator = Validator::make($request->all(), [
-                'employeeName' => 'required|string',
-                'employeeId' => 'required|string|max:255',
-                'fatherName' => 'required',
-                'joingDate' => 'required|date',
-                'managerName' => 'required|string',
-                'nationalId' => 'required',
+                'employeeName' =>'required|string',
+                'employeeId' =>'required|string|max:255',
+                'fatherName' =>'required',
+                'joingDate' =>'required|date',
+                'managerName' =>'required|string',
+                'nationalId' =>'required',
                 'dateOfBirth' => 'required|date',
-                'riligion_id' => 'required',
-                'branch_manage_id' => 'required|integer',
-                'education_id' => 'required|integer',
-                'designation_id' => 'required|integer',
-                'blood_id' => 'required|integer',
-                'gender_id' => 'required|integer',
-                'email' => 'required|email',
-                'marital_id' => 'required|integer',
-                'presentAddress' => 'nullable|string',
-                'permanentAddress' => 'nullable|string',
-                'emergencyNumber' => 'required',
-                'phoneNumber' => 'required',
-                'profilePhoto' => 'nullable|image',
-                'signaturePhoto' => 'nullable|image',
+                'riligion_id' =>'required',
+                'branch_manage_id' =>'nullable',
+                'education_id' =>'required|integer',
+                'designation_id' =>'required|integer',
+                'blood_id' =>'required|integer',
+                'gender_id' =>'required|integer',
+                'email' =>'required|email',
+                'marital_id' =>'required|integer',
+                'presentAddress' =>'string',
+                'permanentAddress' =>'string',
+                'emergencyNumber' =>'required',
+                'phoneNumber' =>'required',
+                'profilePhoto' =>'required',
+                'signaturePhoto' =>'required',
             ]);
 
             if ($validator->fails()) {
@@ -353,8 +353,8 @@ class EmployeeController extends Controller
 
             $search = $request->input('search');
             $employees = Employee::with('designation')->where('employeeName', 'LIKE', '%' . $search . '%')
-                ->orWhere('managerName', 'LIKE', '%' . $search . '%')
                 ->orWhere('phoneNumber', 'LIKE', '%' . $search . '%')
+                ->orWhere('joingDate', 'LIKE', '%' . $search . '%')
                 ->get();
 
             return response()->json([
@@ -368,12 +368,10 @@ class EmployeeController extends Controller
         }
     }
 
-    public function getEmployeeByBranch(Request $request){
+    public function getEmployeeByBranch($branch_id){
         if (Auth::check()) {
 
-            $branchId = $request->input('branch_manage_id');
-
-            $employees = Employee::with('designation')->where('branch_manage_id', $branchId)->get();
+            $employees = Employee::with('designation')->where('branch_manage_id', $branch_id)->get();
 
             return response()->json([
                'message' => 'Employees',
@@ -442,6 +440,76 @@ class EmployeeController extends Controller
             ], 401);
         }
     }
+
+
+    public function branchWishEmployeeShow(){
+
+        if (Auth::check()) {
+            $employee = Employee::with('designation')->where('designation_id','3')->get();
+
+            return response()->json([
+                'data' => $employee
+            ]);
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthenticated',
+            ], 401);
+        }
+    }
+
+    public function employeeList(){
+        if (Auth::check()) {
+            $employeeName_id = request('employeeName_id');
+            $employee_Id = request('employee_Id');
+            $branch_manage_id = request('branch_manage_id');
+            $phoneNumber = request('phoneNumber');
+            $joingDate = request('joingDate');
+
+
+
+
+
+            $data = Employee::where(function ($query) use ($employeeName_id, $employee_Id, $branch_manage_id, $phoneNumber, $joingDate) {
+                if (!empty($employeeName_id)) {
+                    $query->Where('id',  $employeeName_id);
+                }
+                if (!empty($employee_Id)) {
+                    $query->Where('employeeId',  $employee_Id);
+                }
+                if (!empty($branch_manage_id)) {
+                    $query->Where('branch_manage_id',  $branch_manage_id);
+                }
+                if (!empty($phoneNumber)) {
+                    $query->Where('phoneNumber',  'LIKE', '%' . $phoneNumber . '%');
+                }
+
+                if (!empty($joingDate)) {
+                    $query->Where('joingDate', 'LIKE', '%' . $joingDate . '%');
+                }
+
+            })
+                ->with(['designation'])
+                ->latest()
+                ->paginate(10);
+
+
+            return response()->json([
+                'message' => 'Data retrieved successfully',
+                'status' => true,
+                'data' => $data,
+            ], 200);
+
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthenticated',
+            ], 401);
+        }
+    }
+
+
 
 
 

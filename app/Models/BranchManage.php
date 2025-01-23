@@ -27,6 +27,10 @@ class BranchManage extends Model
         return $this->belongsTo(Region::class);
     }
 
+    public function rigionalOffice(){
+        return $this->belongsTo(RegionalOffice::class,'regionalOffice_id');
+    }
+
 
     public function employees()
 {

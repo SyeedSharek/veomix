@@ -41,7 +41,25 @@ class Employee extends Model
         return $this->belongsTo(BranchManage::class, 'branch_manage_id');
     }
 
-   
+    public function maritalStatus(){
+        return $this->belongsTo(MaritalStatus::class, 'marital_id');
+    }
+    public function gender(){
+        return $this->belongsTo(Gender::class, 'gender_id');
+    }
+    public function religion(){
+        return $this->belongsTo(Riligion::class, 'riligion_id');
+    }
+
+    public function education(){
+        return $this->belongsTo(Education::class, 'education_id');
+    }
+    public function bloodGroup(){
+        return $this->belongsTo(BloodGroup::class, 'blood_id');
+    }
+
+
+
 
 
 

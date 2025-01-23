@@ -395,5 +395,22 @@ class MemberManageController extends Controller
         }
     }
 
+
+    public function memberShow(){
+        if(Auth::check()){
+            $members = MemberManage::all();
+            return response()->json([
+               'message' => 'Data get successfully',
+                'data' => $members,
+            ]);
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthorized Access'
+            ], 400);
+        }
+    }
+
 }
 

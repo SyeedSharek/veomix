@@ -16,7 +16,7 @@ class RegionalofficeController extends Controller
     public function index()
     {
         if (Auth::check()) {
-            $data = Regionaloffice::with('divisionOffice', 'country', 'district', 'region')->latest()->paginate(10);
+            $data = Regionaloffice::with(['divisionOffice', 'divisionOffice.employee', 'country', 'district', 'region'])->latest()->paginate(10);
 
             return response()->json([
                 'message' => 'Data get successfully',
@@ -28,6 +28,7 @@ class RegionalofficeController extends Controller
             ], 401);
         }
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -95,7 +96,7 @@ class RegionalofficeController extends Controller
     {
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
-            'regionalOfficeName' => 'required|string',
+            'regionalOfficeName' => 'required|string|unique:regionaloffices,name',
             'divisionoffice_id' => 'required|integer|exists:divisionoffices,id',
             'opening_date' => 'required|date_format:d/m/Y',
             'country_id' => 'required|integer|exists:countries,id',
@@ -140,30 +141,140 @@ class RegionalofficeController extends Controller
      */
     public function destroy($rigionalOffice_id)
     {
-        if(Auth::check()){
+        if (Auth::check()) {
             $rigionalOffice = Regionaloffice::find($rigionalOffice_id);
-            $rigionalOffice->delete();        }
-        else{
+            $rigionalOffice->delete();
+        } else {
             return response()->json([
                 'errors' => 'Unauthorized',
             ]);
         }
+    }
 
 
-
-
-     }
-
-
-     public function searchRigionalOffice(){
-        if(Auth::check()){
+    public function searchRigionalOffice()
+    {
+        if (Auth::check()) {
             $search = request('search');
-            $data = Regionaloffice::where('regionalOfficeName', 'LIKE', '%'. $search. '%')
-            ->orWhere('opening_date', 'LIKE', '%'. $search. '%')
-            ->with('divisionOffice', 'country', 'district','region')
+            $data = Regionaloffice::where('regionalOfficeName', 'LIKE', '%' . $search . '%')
+                ->orWhere('opening_date', 'LIKE', '%' . $search . '%')
+                ->with('divisionOffice', 'country', 'district', 'region')
+                ->latest()
+                ->paginate(10);
+
+            return response()->json([
+                'data' => $data,
+            ]);
+        } else {
+            return response()->json([
+                'errors' => 'Unauthorized',
+            ], 400);
+        }
+    }
+
+
+
+    public function divisionWishSearch($division_id)
+    {
+        if (Auth::check()) {
+            $manager_details  = Regionaloffice::where('divisionoffice_id', $division_id)->with('divisionOffice', 'country', 'district')->paginate(10);
+
+            return response()->json([
+                'message' => 'Data found successfully',
+                'data' => $manager_details,
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+    }
+
+
+
+
+
+
+    public function showEmployeeName()
+    {
+        if (Auth::check()) {
+
+            $data = Regionaloffice::where('divisionoffice_id',)->with('employees')->get();
+
+            return response()->json([
+                'message' => 'Data found successfully',
+                'data' => $data,
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+    }
+
+
+
+
+
+
+
+    public function rigionalList()
+    {
+        if (Auth::check()) {
+
+            $regional_id = request('regional_id');
+            $employee_id = request('employee_id');
+            $opening_date = request('opening_date');
+            $status = request('status');
+            $country_id = request('country_id');
+            $district_id = request('district_id');
+            $upozila = request('upozila');
+
+            $data = Regionaloffice::where(function ($query) use ($regional_id, $employee_id, $opening_date, $status, $country_id, $district_id, $upozila) {
+                if (!empty($regional_id)) {
+                    $query->where('id', $regional_id);
+                }
+                if (!empty($employee_id)) {
+                    $query->whereHas('divisionOffice.employee', function ($subQuery) use ($employee_id) {
+                        $subQuery->where('id', $employee_id);
+                    });
+                }
+                if (!empty($country_id)) {
+                    $query->where('country_id', $country_id);
+                }
+                if (!empty($district_id)) {
+                    $query->where('district_id', $district_id);
+                }
+                if (!empty($upozila)) {
+                    $query->where('upozila', 'LIKE', '%' . $upozila . '%');
+                }
+                if (!empty($opening_date)) {
+                    $query->where('opening_date', 'LIKE', '%' . $opening_date . '%');
+                }
+                if (!empty($status)) {
+                    $query->where('status', $status);
+                }
+            })
+            ->with(['divisionOffice.employee'])
             ->latest()
             ->paginate(10);
 
+            return response()->json([
+                'message' => 'Data retrieved successfully',
+                'status' => true,
+                'data' => $data,
+            ], 200);
+        } else {
+            return response()->json([
+                'error' => 'Unauthorized',
+            ]);
+        }
+    }
+
+
+    public function rigionalOfficeShow(){
+        if(Auth::check()){
+            $data = Regionaloffice::all();
             return response()->json([
                 'data' => $data,
             ]);
@@ -171,110 +282,10 @@ class RegionalofficeController extends Controller
         }
         else{
             return response()->json([
-                'errors' => 'Unauthorized',
-            ],400);
-
-        }
-     }
-
-
-
-     public function divisionWishSearch($division_id){
-        if(Auth::check()){
-            $manager_details  = Regionaloffice::where('divisionoffice_id', $division_id)->with('divisionOffice','country','district')->paginate(10);
-
-            return response()->json([
-               'message' => 'Data found successfully',
-                'data' => $manager_details,
+                'error' => 'Unauthorized',
             ]);
         }
-        else{
-            return response()->json([
-               'message' => 'Unauthenticated',
-            ], 401);
-        }
-     }
-
-
-
-     public function rigionalList(){
-        if(Auth::check()){
-
-            $regional_id = request('regional_id');
-            $managerName_id = request('managerName_id');
-            $opening_date = request('opening_date');
-            $status = request('status');
-            $country_id = request('country_id');
-            $district_id = request('district_id');
-            $upozila = request('upozila');
-
-
-
-
-            $data = Regionaloffice::where(function ($query) use ($regional_id, $managerName_id, $opening_date, $status,$country_id,$district_id,$upozila) {
-                if (!empty($regional_id)) {
-                    $query->Where('manager_id',  $regional_id );
-                }
-                if (!empty($managerName_id)) {
-                    $query->Where('country_id',  $managerName_id );
-                }
-                if (!empty($division_id)) {
-                    $query->Where('division_id',  $division_id );
-                }
-                if (!empty($country_id)) {
-                    $query->Where('division_id',  $country_id );
-                }
-                if (!empty($district_id)) {
-                    $query->Where('district_id',  $district_id );
-                }
-                if (!empty($upozila)) {
-                    $query->Where('upazila',  'LIKE', '%' . $upozila . '%' );
-                }
-
-                if (!empty($opening_date)) {
-                    $query->Where('opening_date', 'LIKE', '%' . $opening_date . '%' );
-                }
-                if (!empty($status)) {
-                    $query->Where('status',  $status );
-                }
-
-
-                 })
-                ->with(['managerName'])
-                ->latest()
-                ->paginate(10);
-
-
-                return response()->json([
-                    'message' => 'Data retrieved successfully',
-                    'status' => true,
-                    'data' => $data,
-                ], 200);
-
-        }
-        else{
-            return response()->json([
-
-                'error'=> 'Unathorized',
-
-            ]);
-        }
-     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 
 
 

@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchGroupController;
 use App\Http\Controllers\Distributor\DistributorController;
+use App\Http\Controllers\EmployeeManagement\EmployeeLeaveController;
 use App\Http\Controllers\Product\ProductBrandController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
@@ -158,6 +159,11 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     // For Frontend Api
     Route::get('/employee/show/{employee_id}',[EmployeeController::class,'showEmployee']);
     Route::get('/division/office/show/{divisionOffice_id}',[DivisionOfficeController::class,'showDivisionOffice']);
+    Route::get('/divisionOffice/employeeName/Show',[DivisionOfficeController::class,'showEmployeeName']);
+    Route::get('/branchManagerWish/employee/show',[EmployeeController::class,'branchWishEmployeeShow']);
+    Route::get('/rigionalOffice/show',[RegionalofficeController::class,'rigionalOfficeShow']);
+    Route::get('/member/show',[MemberManageController::class,'memberShow']);
+    Route::get('/branch/show',[BranchManageController::class,'allBranch']);
 
 
 
@@ -243,18 +249,26 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/store/branch',[BranchManageController::class,'store']);
     Route::delete('/delete/branch/{id}',[BranchManageController::class,'destroy']);
     Route::post('/update/branch/{id}',[BranchManageController::class,'update']);
-    Route::post('/branch/list',[BranchManageController::class,'branchList']);
 
     // Breanch Search
     Route::post('/search/bracnchSearch/all',[BranchManageController::class,'bracnchSearch']);
+    Route::get('/branchNameWish/show/{branchManage_id}',[BranchManageController::class,'branchNameWishShow']);
+    Route::post('/branch/list',[BranchManageController::class,'branchList']);
+
 
 
     // Branch Group Create
 
     Route::get('/all/branchGroups',[BranchGroupController::class,'index']);
     Route::post('/store/branchGroup',[BranchGroupController::class,'store']);
-    Route::delete('/delete/branchGroup/{id}',[BranchGroupController::class,'destroy']);
-    Route::post('/update/branchGroup/{id}',[BranchGroupController::class,'update']);
+    Route::delete('/delete/branchGroup/{group_id}',[BranchGroupController::class,'destroy']);
+    Route::post('/update/branchGroup/{group_id}',[BranchGroupController::class,'update']);
+
+    // Branch Group Search=====
+    Route::get('/memberIdWish/search/{member_id}',[BranchGroupController::class,'searchMemberId']);
+    Route::post('/search/groupSearch/all',[BranchGroupController::class,'groupSearchAll']);
+    Route::post('/search/groupList',[BranchGroupController::class,'groupList']);
+    Route::get('/employeeIdWish/search/{employee_id}',[BranchGroupController::class,'searchEmployeeId']);
 
 
 
@@ -267,7 +281,9 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::delete('/delete/employee/{id}',[EmployeeController::class,'destroy']);
     Route::post('/update/employee/{id}',[EmployeeController::class,'update']);
     Route::post('/search/employee',[EmployeeController::class,'searchEmployee']);
-    Route::post('/search/brach/employee',[EmployeeController::class,'getEmployeeByBranch']);
+    Route::get('/search/brachWish/{branch_id}',[EmployeeController::class,'getEmployeeByBranch']);
+    Route::post('/search/employee/list',[EmployeeController::class,'employeeList']);
+
 
 
 
@@ -275,6 +291,17 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     // Manager Name By Id Search
 
     Route::get('/branch/employeeManagerId',[EmployeeController::class,'employeeManagerId']);
+
+
+
+
+    // Employee Leave =====
+    Route::post('/store/employeeLeave',[EmployeeLeaveController::class,'store']);
+    Route::get('/all/employeeLeave',[EmployeeLeaveController::class,'index']);
+    Route::delete('/delete/employeeLeave/{id}',[EmployeeLeaveController::class,'destroy']);
+    Route::post('/update/employeeLeave/{id}',[EmployeeLeaveController::class,'update']);
+
+
 
     // Member Manage
 

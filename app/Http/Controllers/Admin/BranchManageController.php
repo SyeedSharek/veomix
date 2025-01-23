@@ -18,7 +18,7 @@ class BranchManageController extends Controller
     public function index()
     {
         if (Auth::check()) {
-            $data = BranchManage::with('employee')->latest()->get();
+            $data = BranchManage::with('employee','country','division','district','rigionalOffice')->latest()->paginate(10);
             return response()->json([
                 'message' => 'Data get successfully',
                 'data' => $data,
@@ -45,16 +45,15 @@ class BranchManageController extends Controller
     {
         if (Auth::check()) {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string',
-                'region_id' => 'required|integer',
-                'employee_id' => 'required',
+                'name' => 'required|string|unique:branch_manages,name',
+                'regionalOffice_id' => 'required|integer',
+                'employee_id' => 'required|integer|unique:branch_manages,member_id',
                 'openingDate' => 'required|date',
                 'country_id' => 'required|integer',
                 'division_id' => 'required|integer',
                 'district_id' => 'required|integer',
                 'upozila' => 'required',
                 'union' => 'required',
-                'managerPhone' => 'required|string',
                 'address' => 'required|string',
                 'status' => 'required',
             ]);
@@ -108,8 +107,8 @@ class BranchManageController extends Controller
 
 
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string',
-                'region_id' => 'required|integer',
+                'name' => 'required|string|unique:branch_manages,name,' . $id,
+                'regionalOffice_id' => 'required|integer|unique:branch_manages,employee_id',
                 'managerName' => 'required',
                 'openingDate' => 'required|date',
                 'country_id' => 'required|integer',
@@ -117,7 +116,6 @@ class BranchManageController extends Controller
                 'district_id' => 'required|integer',
                 'upozila' => 'required',
                 'union' => 'required',
-                'managerPhone' => 'required|string',
                 'address' => 'string',
                 'status' => 'required',
             ]);
@@ -167,8 +165,7 @@ class BranchManageController extends Controller
         if (Auth::check()) {
             $search = $request->input('search');
 
-            $branchManage = BranchManage::where('name', 'LIKE', "%{$search}%")
-                            ->orWhere('managerPhone', 'LIKE', "%{$search}%")
+            $branchManage = BranchManage::with('employee')->where('name', 'LIKE', "%{$search}%")
                             ->orWhere('openingDate', 'LIKE', "%{$search}%")
                             ->latest()
                             ->paginate(10);
@@ -184,7 +181,110 @@ class BranchManageController extends Controller
         }
     }
 
-    public function branchList(Request $request) {}
+    public function branchNameWishShow($branchManage_id){
+        if(Auth::check()){
+            $branchManage = BranchManage::with('employee')->where('id',$branchManage_id)->first();
+            return response()->json([
+               'message' => 'Data found successfully',
+                'data' => $branchManage,
+            ]);
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthorized Access',
+            ], 401);
+        }
+
+    }
+
+
+
+
+
+
+    public function branchList(Request $request) {
+        if(Auth::check()){
+
+            $employee_Id = request('employee_id');
+            $opening_date = request('opening_date');
+            $status = request('status');
+            $country_id = request('country_id');
+            $district_id = request('district_id');
+            $upozila = request('upozila');
+            $branchName = request('branch_name');
+            $branch_id = request('branch_id');
+
+
+            $data = BranchManage::where(function ($query) use ($employee_Id, $opening_date, $status, $country_id, $district_id, $upozila,$branchName, $branch_id) {
+                if (!empty($employee_Id)) {
+                    $query->Where('employee_id',  $employee_Id);
+                }
+                if (!empty($country_id)) {
+                    $query->Where('country_id',  $country_id);
+                }
+                if (!empty($district_id)) {
+                    $query->Where('division_id',  $district_id);
+                }
+                if (!empty($upozila)) {
+                    $query->Where('upozila',  'LIKE', '%' . $upozila . '%');
+                }
+
+                if (!empty($opening_date)) {
+                    $query->Where('openingDate', 'LIKE', '%' . $opening_date . '%');
+                }
+                if (!empty($branchName)) {
+                    $query->Where('name', 'LIKE', '%' . $branchName . '%');
+                }
+
+                if (!empty($branch_id)) {
+                    $query->Where('id', 'LIKE', '%' . $branch_id . '%');
+                }
+
+                if (!empty($status)) {
+                    $query->Where('status',  $status);
+                }
+            })
+                ->with(['employee'])
+                ->latest()
+                ->paginate(10);
+
+
+            return response()->json([
+                'message' => 'Data retrieved successfully',
+                'status' => true,
+                'data' => $data,
+            ], 200);
+        } else {
+            return response()->json([
+
+                'error' => 'Unathorized',
+
+            ]);
+        }
+
+
+
+
+
+
+
+    }
+
+    public function allBranch(){
+        if(Auth::check()){
+            $data = BranchManage::all();
+            return response()->json([
+               'message' => 'Data retrieved successfully',
+                'data' => $data,
+            ]);
+        } else {
+            return response()->json([
+               'message' => 'Unauthorized Access',
+            ], 401);
+        }
+    }
+
 
 
 

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('group_name');
             $table->unsignedBigInteger('employee_id');
-            $table->unsignedBigInteger('groupManager_id')->nullable();
+            $table->unsignedBigInteger('member_id');
             $table->date('opening_date');
             $table->unsignedBigInteger('country_id');
             $table->unsignedBigInteger('division_id');
