@@ -114,6 +114,10 @@ class SalaryDisbursmentController extends Controller
     public function update(Request $request, $salaryDisbutsment_id)
     {
         if (Auth::check()) {
+            $entry_by = Auth::user();
+            $update_name = $entry_by->name;
+
+
             $validator = Validator::make($request->all(), [
                 'employee_id' => 'required|integer|exists:employees,id',
                 'month_id' => 'required|integer|exists:months,id',
@@ -145,6 +149,7 @@ class SalaryDisbursmentController extends Controller
             $data = $request->all();
 
             $data['totalSalary'] = $totalSalary;
+            $data['updated_by'] = $update_name;
 
             $salaryDisbursement->update($data);
 
@@ -287,11 +292,35 @@ class SalaryDisbursmentController extends Controller
 
 
 
+    public function branchTotalSalaryShow()
+    {
+        if (Auth::check()) {
+            $branch_salaries = SalaryDisbursement::join('employees', 'salary_disbursements.employee_id', '=', 'employees.id')
+                ->join('branch_manages', 'employees.branch_manage_id', '=', 'branch_manages.id')
+                ->join('months', 'salary_disbursements.month_id', '=', 'months.id')
+                ->selectRaw('
+                    branch_manages.name as branch_name,
+                    months.month as salary_month,
+                    SUM(salary_disbursements.totalSalary) as total_salary,
+                    salary_disbursements.entry_by,
+                    salary_disbursements.salaryFromDate,
+                    salary_disbursements.updated_by
+                ')
+                ->groupBy('branch_manages.name', 'months.month', 'salary_disbursements.entry_by', 'salary_disbursements.salaryFromDate', 'salary_disbursements.updated_by')
+                ->get();
 
+            return response()->json([
+                'status' => true,
+                'message' => 'Total salaries retrieved successfully',
+                'data' => $branch_salaries,
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
+        }
 
-
-
-
+    }
 
 
 

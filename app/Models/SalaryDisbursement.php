@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SalaryDisbursement extends Model
 {
     protected $fillable = [
-        'employee_id','month_id','basicSalary','houseRent','entry_by','ta','da','festivalBonus','providentFund','salaryFromDate','salaryPayDate','totalSalary'
+        'employee_id','month_id','basicSalary','houseRent','updated_by','entry_by','ta','da','festivalBonus','providentFund','salaryFromDate','salaryPayDate','totalSalary'
     ];
 
     public function employee(){

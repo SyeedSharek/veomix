@@ -314,6 +314,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/all/salaryDisbursement',[SalaryDisbursmentController::class,'index']);
     Route::delete('/delete/salaryDisbursement/{salaryDisbutsment_id}',[SalaryDisbursmentController::class,'destroy']);
     Route::post('/update/salaryDisbursement/{salaryDisbutsment_id}',[SalaryDisbursmentController::class,'update']);
+    Route::get('/branchId/wish/total',[SalaryDisbursmentController::class,'branchTotalSalaryShow']);
 
 
     // Employee Salary Search ======
