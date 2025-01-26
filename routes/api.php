@@ -30,6 +30,7 @@ use App\Http\Controllers\productWarranty\ProductWarrantyController;
 use App\Http\Controllers\productWarranty\WarrantyCreateController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
+use App\Http\Controllers\EmployeeManagement\SalaryDisbursmentController;
 use App\Http\Controllers\Supplier\SupplierController;
 use App\Http\Controllers\WholeSalesController;
 
@@ -169,6 +170,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
 
 
 
+
     //  Country
     Route::get('/all/countries',[CountryController::class,'index']);
     Route::post('/store/country',[CountryController::class,'store']);
@@ -298,8 +300,29 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     // Employee Leave =====
     Route::post('/store/employeeLeave',[EmployeeLeaveController::class,'store']);
     Route::get('/all/employeeLeave',[EmployeeLeaveController::class,'index']);
-    Route::delete('/delete/employeeLeave/{id}',[EmployeeLeaveController::class,'destroy']);
-    Route::post('/update/employeeLeave/{id}',[EmployeeLeaveController::class,'update']);
+    Route::delete('/delete/employeeLeave/{employeeLeave_id}',[EmployeeLeaveController::class,'destroy']);
+    Route::post('/update/employeeLeave/{employeeLeave_id}',[EmployeeLeaveController::class,'update']);
+    Route::get('/eyeView/employeeLeave/{employee_id}',[EmployeeLeaveController::class, 'employeeWishList']);
+
+    // Employee Leave Search
+    Route::post('/search/employeeLeave/all',[EmployeeLeaveController::class,'searchEmployeeLeave']);
+    Route::get('/search/employeeLeave/{branch_id}',[EmployeeLeaveController::class,'employeeLeaveBrachID']);
+
+
+    // Employee Salary Disbursement=======
+    Route::post('/store/salaryDisbursement',[SalaryDisbursmentController::class,'store']);
+    Route::get('/all/salaryDisbursement',[SalaryDisbursmentController::class,'index']);
+    Route::delete('/delete/salaryDisbursement/{salaryDisbutsment_id}',[SalaryDisbursmentController::class,'destroy']);
+    Route::post('/update/salaryDisbursement/{salaryDisbutsment_id}',[SalaryDisbursmentController::class,'update']);
+
+
+    // Employee Salary Search ======
+    Route::get('/search/salaryDisbursement/{branch_id}',[SalaryDisbursmentController::class,'employeeSalaryBranchID']);
+    Route::post('/search/salaryDisbursement/all',[SalaryDisbursmentController::class,'searchEmployeeSalaryDisbursement']);
+    Route::post('/search/salaryDisbursement/list/idWish',[SalaryDisbursmentController::class,'searchEmployeeSalaryidWish']);
+
+    Route::get('/eyeView/salaryDisbursement/{employee_id}',[SalaryDisbursmentController::class, 'employeeWishList']);
+
 
 
 

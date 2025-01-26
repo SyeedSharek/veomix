@@ -9,35 +9,48 @@ class BranchManage extends Model
     protected $guarded = [];
 
 
-    public function employee(){
+    public function employee()
+    {
         return $this->belongsTo(Employee::class);
     }
 
 
-    public function country(){
+
+    public function salaryManager()
+    {
+        return $this->hasOne(SalaryDisbursement::class, 'id', 'branch_manage_id');
+    }
+
+
+
+
+
+
+    public function country()
+    {
         return $this->belongsTo(Country::class);
     }
-    public function division(){
+    public function division()
+    {
         return $this->belongsTo(Division::class);
     }
-    public function district(){
+    public function district()
+    {
         return $this->belongsTo(District::class);
     }
-    public function Region(){
+    public function Region()
+    {
         return $this->belongsTo(Region::class);
     }
 
-    public function rigionalOffice(){
-        return $this->belongsTo(RegionalOffice::class,'regionalOffice_id');
+    public function rigionalOffice()
+    {
+        return $this->belongsTo(RegionalOffice::class, 'regionalOffice_id');
     }
 
 
     public function employees()
-{
-    return $this->hasMany(Employee::class, 'branch_manage_id');
-}
-
-
-
-
+    {
+        return $this->hasMany(Employee::class, 'branch_manage_id');
+    }
 }
