@@ -296,6 +296,31 @@ class ProductController extends Controller
 
 
 
+    public function productNameSerch(Request $request){
+        if(Auth::check()){
+            $productName = request('productName');
+            $data = Product::where('productName','LIKE','%'.$productName.'%')->latest()->paginate(10);
+            return response()->json([
+               'message' => 'Data get successfully',
+               'status' => true,
+                'data' => $data
+            ], 200);
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthorized Access',
+               'status' => false
+            ], 401);
+        }
+    }
+
+
+
+
+
+
+
 
 
 }

@@ -7,6 +7,8 @@ use App\Models\MemberManage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+
 
 class MemberManageController extends Controller
 {
@@ -48,9 +50,17 @@ class MemberManageController extends Controller
                 'dataOfBirth' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->dataOfBirth)->format('Y-m-d'),
             ]);
 
+            $random_id = rand(1000, 9999);
+
+            while (MemberManage::where('member_card_id', $random_id)->exists()) {
+
+                $random_id = rand(1000, 9999);
+            }
+
 
 
             $validator = Validator::make($request->all(), [
+                'member_card_id' => 'unique:members,member_card_id',
                 'memberName_english' => 'required|string',
                 'memberName_bangla' => 'required|string',
                 'banchGroup_id' => 'nullable|exists:branch_groups,id',
@@ -131,6 +141,7 @@ class MemberManageController extends Controller
                 // $imageName = 'employee/profile'. $imageName;
                 $data['nomineeSignature'] = 'member/nomieSignature/' . $imageName;
             }
+            $data['member_card_id'] = $random_id;
 
             $member = MemberManage::create($data);
 
@@ -411,6 +422,77 @@ class MemberManageController extends Controller
             ], 400);
         }
     }
+
+
+
+    public function closeMember(Request $request){
+        if(Auth::check()){
+
+            $id = $request->id;
+            $reason = $request->close_reason;
+
+            $member = MemberManage::find($id);
+            $member->status = '0';
+            $member->closing_reason = $reason;
+            $member->save();
+            return response()->json([
+               'message' => 'Member closed successfully',
+                'data' => $member,
+            ]);
+
+
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthorized Access'
+            ], 400);
+        }
+    }
+
+
+
+    public function transferGroup(Request $request){
+        if(Auth::check()){
+            $id = $request->member_id;
+            $transfer_reason = $request->transfer_reason;
+            $branch_group_id = $request->branch_group_id;
+            $member = MemberManage::find($id);
+            $member->banchGroup_id = $branch_group_id;
+            $member->transfer_reason = $transfer_reason;
+            $member->save();
+            return response()->json([
+               'message' => 'Member transfer successfully',
+                'data' => $member,
+            ]);
+
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthorized Access'
+            ], 400);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 

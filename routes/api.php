@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchGroupController;
+use App\Http\Controllers\CompanySettings\CompanySettingController;
 use App\Http\Controllers\Distributor\DistributorController;
 use App\Http\Controllers\EmployeeManagement\EmployeeLeaveController;
 use App\Http\Controllers\Product\ProductBrandController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\productWarranty\WarrantyCreateController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\EmployeeManagement\SalaryDisbursmentController;
+use App\Http\Controllers\Product\PurchaseEntryController;
 use App\Http\Controllers\Supplier\SupplierController;
 use App\Http\Controllers\WholeSalesController;
 
@@ -315,6 +317,9 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::delete('/delete/salaryDisbursement/{salaryDisbutsment_id}',[SalaryDisbursmentController::class,'destroy']);
     Route::post('/update/salaryDisbursement/{salaryDisbutsment_id}',[SalaryDisbursmentController::class,'update']);
     Route::get('/branchId/wish/total',[SalaryDisbursmentController::class,'branchTotalSalaryShow']);
+    Route::post('/list/salaryDisbursement',[SalaryDisbursmentController::class, 'salaryDisbursementList']);
+    Route::post('/search/list/by/allListByAllName',[SalaryDisbursmentController::class, 'searchEmployeeSalaryListByAllName']);
+
 
 
     // Employee Salary Search ======
@@ -327,7 +332,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
 
 
 
-    // Member Manage
+    // Member Manage ============
 
     Route::get('/all/members',[MemberManageController::class,'index']);
     Route::post('/store/member',[MemberManageController::class,'store']);
@@ -336,6 +341,8 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/search/member',[MemberManageController::class,'searchMember']);
     Route::post('/search/branch/member',[MemberManageController::class,'getMemberByBranch']);
     // Route::post('/all/eye/view/{id}',[MemberManageController::class,'eyeViewDetails']);
+    Route::post('/member/close',[MemberManageController::class,'closeMember']);
+    Route::post('/member/transfer/group',[MemberManageController::class,'transferGroup']);
 
 
 
@@ -365,6 +372,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/search/supplier',[SupplierController::class,'searchSupplier']);
     Route::post('/branch_wish/search/supplier',[SupplierController::class,'brachWish_search']);
     Route::post('/search/supplierList',[SupplierController::class,'supplierListSearch']); // Supplier List Search
+    Route::post('/search/supplierNameWish',[SupplierController::class,'supplierNameSearch']); // Supplier Name Wish Search
 
     // Product Route
     Route::get('/all/product',[ProductController::class,'index']);
@@ -373,6 +381,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/update/product/{id}',[ProductController::class,'update']);
     Route::post('/search/product',[ProductController::class,'searchProduct']);
     Route::post('/search/productList',[ProductController::class,'productSearchList']); // All Product List Search
+    Route::post('/search/producNameWish',[ProductController::class,'productNameSerch']); // Product Name Wish Search
 
 
 
@@ -437,7 +446,21 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     // Product Warranty Create
     Route::get('/member/details/{member_Id}',[WarrantyCreateController::class,'memberDetails']);
 
+    // Purchase Entry =========
+    Route::post('/product/purchase/entry',[PurchaseEntryController::class,'productPurchase']);
 
 
+
+
+
+
+
+
+
+
+
+
+    // Company Setting
+    Route::post('/store/company/settings',[CompanySettingController::class,'store']);
 
 });

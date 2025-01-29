@@ -16,7 +16,7 @@ class SalaryDisbursmentController extends Controller
     public function index()
     {
         if (Auth::check()) {
-            $data = SalaryDisbursement::with(['employee', 'month', 'branch'])->latest()->paginate(10);
+            $data = SalaryDisbursement::with(['employee.branchName', 'month',])->latest()->paginate(10);
 
             return response()->json([
                 'message' => 'Data fetched successfully',
@@ -75,9 +75,9 @@ class SalaryDisbursmentController extends Controller
 
             $data = $request->all();
             $data['totalSalary'] = $totalSalary;
-            $data['salaryFromDate'] = now();
             $data['salaryPayDate'] = now();
             $data['entry_by'] = $entry_name;
+            $data['updated_by'] = null;
 
             $data = SalaryDisbursement::create($data);
 
@@ -150,6 +150,7 @@ class SalaryDisbursmentController extends Controller
 
             $data['totalSalary'] = $totalSalary;
             $data['updated_by'] = $update_name;
+
 
             $salaryDisbursement->update($data);
 
@@ -321,6 +322,98 @@ class SalaryDisbursmentController extends Controller
         }
 
     }
+
+
+    public function salaryDisbursementList(Request $request)
+{
+    if (!Auth::check()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    $month_id = $request->input('month_id');
+    $from_date = $request->input('from_date');
+    $upto_date = $request->input('upto_date');
+    $branch_id = $request->input('branch_id');
+
+    $data = SalaryDisbursement::where(function ($query) use ($month_id, $from_date, $upto_date, $branch_id) {
+        if (!empty($month_id)) {
+            $query->where('month_id', $month_id);
+        }
+        if (!empty($from_date) && !empty($upto_date)) {
+            $query->whereBetween('salaryPayDate', [$from_date, $upto_date]);
+        } elseif (!empty($from_date)) {
+            $query->whereDate('salaryPayDate', '>=', $from_date);
+        } elseif (!empty($upto_date)) {
+            $query->whereDate('updated_at', '<=', $upto_date);
+        }
+        if (!empty($branch_id)) {
+            $query->whereHas('employee', function ($q) use ($branch_id) {
+                $q->where('branch_manage_id', $branch_id);
+            });
+        }
+    })
+    ->with(['employee.branchName', 'month'])
+    ->latest()
+    ->paginate(10);
+
+    if ($data->isEmpty()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'No records found for the given criteria.',
+            'data' => [],
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Data retrieved successfully',
+        'data' => $data,
+    ], 200);
+}
+
+
+
+
+public function searchEmployeeSalaryListByAllName(Request $request)
+{
+    if (!Auth::check()) {
+        return response()->json([
+            'error' => 'Unauthorized',
+        ], 401);
+    }
+
+    $search = $request->input('search');
+
+
+    $leave = SalaryDisbursement::with(['employee', 'month'])
+        ->where(function ($query) use ($search) {
+            $query->where('entry_by', 'LIKE', '%' . $search . '%')
+                ->orWhere('updated_by', 'LIKE', '%' . $search . '%')
+                ->orWhere('salaryPayDate', 'LIKE', '%' . $search . '%');
+        })
+        ->latest()
+        ->paginate(10);
+
+    return response()->json([
+        'message' => 'Data retrieved successfully',
+        'data' => $leave,
+    ]);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

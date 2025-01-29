@@ -304,6 +304,29 @@ class SupplierController extends Controller
 
 
 
+    public function supplierNameSearch(){
+        if(Auth::check()){
+            $supplierName = request('supplierName');
+
+            $data = Supplier::where('supplierName', 'LIKE', '%'.$supplierName.'%')
+                ->latest()
+                ->get();
+
+            return response()->json([
+               'message' => 'Data get successfully',
+                'data' => $data,
+            ]);
+
+        }
+        else{
+            return response()->json([
+
+                'error'=> 'Unathorized',
+
+            ]);
+        }
+    }
+
 
 
 
