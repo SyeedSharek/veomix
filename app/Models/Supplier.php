@@ -6,19 +6,34 @@ use Illuminate\Database\Eloquent\Model;
 
 class Supplier extends Model
 {
-    protected $fillable = ['id','supplierName','proprieTorModel','phoneNumber','contactPersonName','openDate',
-    'email','webAddress','supplierGradeId','supplierAddress','branchId','supplierId'];
+    protected $fillable = [
+        'id',
+        'supplierName',
+        'proprieTorModel',
+        'phoneNumber',
+        'contactPersonName',
+        'openDate',
+        'email',
+        'webAddress',
+        'supplierGradeId',
+        'supplierAddress',
+        'branchId',
+        'supplierId'
+    ];
 
-    public function supplierGrade(){
+    public function supplierGrade()
+    {
         return $this->belongsTo(SupplierGrade::class, 'supplierGradeId');
     }
 
-    public function branch(){
+    public function branch()
+    {
         return $this->belongsTo(BranchManage::class, 'branchId');
     }
 
-
-
-
-
+    // In the Supplier model (App\Models\Supplier)
+    // public function billings()
+    // {
+    //     return $this->hasMany(Billing::class, 'supplier_id'); // Assuming 'supplier_id' is the foreign key in the 'billings' table
+    // }
 }

@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('purchase_billing_details', function (Blueprint $table) {
+        Schema::create('billings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('supplier_id');
-            $table->json('product_id');
-            $table->string('total_bill_amount');
-            $table->string('invoice_amount');
-            $table->string('product_quantity');
-            $table->string('after_discount_total_amount');
-            $table->string('customer_balance');
-            $table->string('customer_due_balance');
+            $table->string('voucher_number');
+             $table->decimal('total_amount', 10, 2);
+             $table->date('purchase_date');
+             $table->date('product_warrenty_date');
+
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('purchase_billing_details');
+        Schema::dropIfExists('billings');
     }
 };

@@ -33,6 +33,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\EmployeeManagement\SalaryDisbursmentController;
 use App\Http\Controllers\Product\PurchaseEntryController;
+use App\Http\Controllers\Product\ReturnProductController;
 use App\Http\Controllers\Supplier\SupplierController;
 use App\Http\Controllers\WholeSalesController;
 
@@ -448,6 +449,25 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
 
     // Purchase Entry =========
     Route::post('/product/purchase/entry',[PurchaseEntryController::class,'productPurchase']);
+    Route::get('/product/purchase/list',[PurchaseEntryController::class,'purchaseList']);
+    Route::get('/product/list/{paymentId}',[PurchaseEntryController::class,'paymentIdWishShow']);  // eye view
+    Route::delete('/porduct/purchase/entry/delete/{paymentId}',[PurchaseEntryController::class,'paymentDeleteWithBilling']); // Delete with Billing and Billing Details
+    Route::post('/product/purchase/update/{paymentId}',[PurchaseEntryController::class,'paymentUpdateWithBilling']); // Update with Billing and Billing Details
+    Route::post('/product/purchase/list/search',[PurchaseEntryController::class,'purchaseListSearch']);
+    Route::post('/product/purchase/idWishSearch',[PurchaseEntryController::class,'purchaseIdWishListSearch']);
+    Route::get('/product/purchase/branchIdWishSearch/{banchId}',[PurchaseEntryController::class,'branchIdWishSearch']); // Branch Id Wish data show
+     Route::get('/product/purchase/supplyIdWishList/{supplyId}',[PurchaseEntryController::class,'supplyIdWishProductShow']); // For ForntEnd Api
+
+
+
+    // Return Product purchase
+    Route::post('/product/return',[ReturnProductController::class,'productReturn']);
+    Route::get('/product/return/showDetails',[ReturnProductController::class,'showReturnDetails']);
+    Route::post('/product/return/search',[ReturnProductController::class,'searchReturnDetails']);
+    Route::post('/product/return/returnList',[ReturnProductController::class,'searchReturnListIdWish']);
+
+
+
 
 
 
