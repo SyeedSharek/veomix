@@ -75,10 +75,10 @@ class ReturnProductController extends Controller
             $billing->update(['after_return_price' => $new_total_price]);
 
 
-            $new_quantity = $billingDetail->quantity - $request->return_quantity;
+            $new_quantity = $billingDetail->avilable_stock_quantity - $request->return_quantity;
             $billingDetail->update([
                 'subtotal' => $billingDetail->subtotal - $request->return_amount,
-                'quantity' => $new_quantity
+                'avilable_stock_quantity' => $new_quantity
             ]);
 
 
@@ -106,7 +106,8 @@ class ReturnProductController extends Controller
                     'return_amount' => $request->return_amount,
                     'return_quantity' => $request->return_quantity,
                     'avilable_total_price' => $new_total_price,
-                    'avilable_quantity' => $new_quantity
+                    'avilable_quantity' => $new_quantity,
+                    'billing_id' => $request->billing_id,
                 ]);
             }
 
@@ -201,8 +202,10 @@ class ReturnProductController extends Controller
                     $query->where('supplier_id', 'LIKE', '%' . $supplier_id . '%');
                 })
 
-                ->whereHas('billing.voucher_number', function ($query) use ($voucher_number) {
-                    $query->where('supplier_id', 'LIKE', '%' . $voucher_number . '%');
+                ->when($voucher_number, function ($query) use ($voucher_number) {
+                    $query->whereHas('billing', function ($query) use ($voucher_number) {
+                        $query->where('voucher_number', 'LIKE', '%' . $voucher_number . '%');
+                    });
                 })
 
 

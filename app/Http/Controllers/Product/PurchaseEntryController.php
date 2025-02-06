@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Billing;
 use App\Models\BillingDetail;
 use App\Models\PaymentDetail;
+use App\Models\ProductStockManagement;
 use App\Models\PurchaseBillingDetails;
 use App\Models\PurchasePaymentDetails;
 use App\Models\Supplier;
@@ -98,10 +99,10 @@ class PurchaseEntryController extends Controller
                 'voucher_number' => 'required|string',
                 'products' => 'required|array',
                 'products.*.product_id' => 'required|integer|exists:products,id',
-                'products.*.quantity' => 'required|integer|min:1',
-                'products.*.price' => 'required|numeric|min:0',
-                'total_amount' => 'required|numeric|min:0',
-                'customer_paid_amount' => 'required|numeric|min:0',
+                'products.*.quantity' => 'required|string|min:1',
+                'products.*.price' => 'required|string|min:0',
+                'total_amount' => 'required|string|min:0',
+                'customer_paid_amount' => 'required|string|min:0',
                 'payment_method_id' => 'required|integer',
                 'invoice_discount' => 'string',
                 'purchase_date' => 'required|date_format:d/m/Y',
@@ -132,14 +133,36 @@ class PurchaseEntryController extends Controller
 
                 // Step 2: Insert Billing Details (Loop through products)
                 foreach ($request->products as $product) {
+
+                    $product_id = $product['product_id'];
+                    $new_quantity = $product['quantity'];
+
                     BillingDetail::create([
                         'billing_id' => $billing->id,
                         'product_id' => $product['product_id'],
                         'quantity' => $product['quantity'],
                         'price' => $product['price'],
                         'subtotal' => $product['quantity'] * $product['price'],
+                        'avilable_stock_quantity' => $product['quantity'],
                     ]);
+
+
+                    $productStock = ProductStockManagement::where('product_id', $product_id)->first();
+
+                    if ($productStock) {
+                        // If product exists, increment quantity
+                        $productStock->increment('total_product_quantity', $new_quantity);
+                    } else {
+                        // If product doesn't exist, create a new record
+                        ProductStockManagement::create([
+                            'product_id' => $product_id,
+                            'total_product_quantity' => $new_quantity,
+                        ]);
+                    }
                 }
+
+
+
 
                 // Step 3: Insert Payment Details
 
@@ -454,90 +477,44 @@ class PurchaseEntryController extends Controller
     }
 
 
-    public function branchIdWishSearch($banchId){
+    public function branchIdWishSearch($banchId)
+    {
         if (Auth::check()) {
 
             $productPurchaseDetails = PaymentDetail::with(['billing', 'billing.billingDetails.product', 'billing.supplier'])
-            ->whereHas('billing.supplier', function ($query) use ($banchId) {
-                $query->where('branchId', $banchId);
-            })
-            ->paginate(10);
+                ->whereHas('billing.supplier', function ($query) use ($banchId) {
+                    $query->where('branchId', $banchId);
+                })
+                ->paginate(10);
 
-        return response()->json([
-            'product_purchase_details' => $productPurchaseDetails
-        ], 200);
-
-        }
-        else{
+            return response()->json([
+                'product_purchase_details' => $productPurchaseDetails
+            ], 200);
+        } else {
             return response()->json(['message' => 'Unauthorized'], 400);
         }
-
-
-
     }
 
 
 
 
     public function supplyIdWishProductShow($supplyId)
-{
-    if (!Auth::check()) {
-        return response()->json(['message' => 'Unauthorized'], 400);
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 400);
+        }
+
+        // Fetch billing records that belong to the given supplier ID
+        $productPurchaseDetails = Billing::with(['billingDetails.product'])
+            ->where('supplier_id', $supplyId) // Directly filter by supplier_id
+            ->paginate(20);
+
+        if ($productPurchaseDetails->isEmpty()) {
+            return response()->json(['message' => 'No products found for this supplier'], 404);
+        }
+
+        return response()->json([
+            'product_purchase_details' => $productPurchaseDetails
+        ], 200);
     }
-
-    // Check supplier existence first
-    $supplierExists = Supplier::where('id', $supplyId)->exists();
-
-    if (!$supplierExists) {
-        return response()->json(['message' => 'Supplier not found'], 404);
-    }
-
-    // Query the product purchase details
-    $productPurchaseDetails = PaymentDetail::with([
-        'billing',
-        'billing.billingDetails.product',
-        'billing.supplier'
-    ])
-    ->whereHas('billing', function ($query) use ($supplyId) {
-        $query->whereHas('supplier', function ($q) use ($supplyId) {
-            $q->where('supplierId', $supplyId);
-        })
-        ->whereHas('billingDetails', function ($q) {
-            $q->whereNotNull('product_id');
-        });
-    })
-    ->get();
-
-    // Debugging: Output query results before returning
-    if ($productPurchaseDetails->isEmpty()) {
-        return response()->json(['message' => 'No products found for this supplier'], 404);
-    }
-
-    return response()->json([
-        'product_purchase_details' => $productPurchaseDetails
-    ], 200);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

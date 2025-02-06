@@ -32,8 +32,11 @@ use App\Http\Controllers\productWarranty\WarrantyCreateController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\EmployeeManagement\SalaryDisbursmentController;
+use App\Http\Controllers\HireTransaction\HireTransactionController;
+use App\Http\Controllers\Product\DamageProductController;
 use App\Http\Controllers\Product\PurchaseEntryController;
 use App\Http\Controllers\Product\ReturnProductController;
+use App\Http\Controllers\Sales\CashSalesController;
 use App\Http\Controllers\Supplier\SupplierController;
 use App\Http\Controllers\WholeSalesController;
 
@@ -469,9 +472,29 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
 
 
 
+    // Damage Product
+
+    Route::post('/product/damage/entry',[DamageProductController::class,'DamageProductEntry']); // store data
+    Route::get('/product/damage/showDeatils',[DamageProductController::class,'DamageProductShowDeatils']);  // index show data
+    Route::post('/product/damage/serach',[DamageProductController::class,'DamageProductSearch']);  // all search
+    Route::get('/product/damage/showDetails/eyeView/{damage_id}',[DamageProductController::class,'damageIdWishShow']);  //Eye view Wish Show data
+    Route::post('/product/damage/update/{damage_id}',[DamageProductController::class,'damageProductUpdate']);
+    Route::get('/product/damage/search/{supplier_id}',[DamageProductController::class,'supplierIdWishSearch']); // Supplier Id Wish search Sigle Search
+    Route::post('/product/damage/damageList/search',[DamageProductController::class,'searchDamageListIdWish']);
+    Route::post('/product/damage/delete/{damage_id}',[DamageProductController::class,'damageDelete']);
 
 
 
+
+
+    // Sales Cash
+    Route::post('/sales/cash/product',[CashSalesController::class,'cashSalesEntry']);
+    Route::post('/whole/sailer/cash/product',[CashSalesController::class,'wholeSalesEntry']);
+    Route::post('/hire/sales/loan/product',[CashSalesController::class,'hireSalesEntry']);
+
+
+    // Hire Transaction Manage
+    Route::post('/hire/installment/receive',[HireTransactionController::class,'receiveHireTransaction']);
 
 
 
