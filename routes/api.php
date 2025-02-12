@@ -37,6 +37,7 @@ use App\Http\Controllers\Product\DamageProductController;
 use App\Http\Controllers\Product\PurchaseEntryController;
 use App\Http\Controllers\Product\ReturnProductController;
 use App\Http\Controllers\Sales\CashSalesController;
+use App\Http\Controllers\Sales\CustomerSalesReturn;
 use App\Http\Controllers\Supplier\SupplierController;
 use App\Http\Controllers\WholeSalesController;
 
@@ -347,6 +348,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     // Route::post('/all/eye/view/{id}',[MemberManageController::class,'eyeViewDetails']);
     Route::post('/member/close',[MemberManageController::class,'closeMember']);
     Route::post('/member/transfer/group',[MemberManageController::class,'transferGroup']);
+    Route::post('/member/memberStatement/search/filter',[MemberManageController::class,'memberStatementSearchFilter']);
 
 
 
@@ -472,6 +474,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
 
 
 
+
     // Damage Product
 
     Route::post('/product/damage/entry',[DamageProductController::class,'DamageProductEntry']); // store data
@@ -487,15 +490,84 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
 
 
 
-    // Sales Cash
+    // Sales Cash , hires sales , whole sales
     Route::post('/sales/cash/product',[CashSalesController::class,'cashSalesEntry']);
     Route::post('/whole/sailer/cash/product',[CashSalesController::class,'wholeSalesEntry']);
     Route::post('/hire/sales/loan/product',[CashSalesController::class,'hireSalesEntry']);
 
+    Route::get('/sales/invoice/list',[CashSalesController::class,'showSalesInvoiceIndex']); // all details with Cash, Hire , Whole in one Api
+    Route::post('/sales/invoice/search/list',[CashSalesController::class,'invoiceIdWishSearch']);
+    Route::get('/sales/invoice/list/view/{sales_type_id}',[CashSalesController::class,'eyeViewSalesIdDetails']); // Eye View Whole View Details // It also Sales Type Wish show data
+    Route::post('/sales/invoice/hire/search',[CashSalesController::class,'allSearchInvoiceList']); // only hire search
+    Route::delete('/sales/invoice/delete/{id}/{sales_type_id}',[CashSalesController::class,'deleteSalesInvoice']);
+
+    Route::get('/all/sales/type/show',[CashSalesController::class,'showSalesType']); // Show Only Show Type Data
+
+    // Day Wish Sales Data Show // Sales Details Report 2i tai Same API
+    Route::post('/sales/dayWish/search',[CashSalesController::class,'dayWishSearchList']);
 
     // Hire Transaction Manage
     Route::post('/hire/installment/receive',[HireTransactionController::class,'receiveHireTransaction']);
+    Route::get('/hire/installment/show/details',[HireTransactionController::class,'index']);
+    Route::post('/hire/installment/update/{installment_manage_id}',[HireTransactionController::class,'update']);
+    Route::delete('/hire/installment/delete/{installment_manage_id}',[HireTransactionController::class,'destroy']);
+    Route::get('/hire/installment/show/data/{member_id}',[HireTransactionController::class,'memberIdWishShowData']);
+    Route::post('/hire/installmentReport/search',[HireTransactionController::class,'hireInstallmentReport']);
+    // Hire Transaction Collection Sheet
+    Route::post('/hire/installment/collection/sheet/search',[HireTransactionController::class,'collectionSheetSearch']);
+    Route::post('/hire/installment/collection/sheet/allSearch',[HireTransactionController::class,'collectionSheetAllSearch']);
 
+    // Hire Group Collection List
+    Route::post('/hire/installment/groupList/search/filter',[HireTransactionController::class,'groupListFilterSearch']);
+    Route::get('/hire/installment/groupList/eyeView/{installment_id}',[HireTransactionController::class,'installmentIdWishEyeView']);
+    Route::get('/hire/installment/groupList/showIndex',[HireTransactionController::class,'groupListIndex']); // All Group List Show Index
+    Route::post('/hire/installment/groupList/allGrouplistSearch',[HireTransactionController::class,'allGrouplistSearch']);
+
+    Route::get('/hire/installment/groupList/{branch_group_id}',[HireTransactionController::class,'branchGroupIdWishSearch']);
+
+    // Hire Transaction Installment Group Report
+
+    // Branch group Id wish search Use this Route =  Route::get('/hire/installment/groupList/{branch_group_id}'
+    Route::post('/hire/installment/report/searchFilter',[HireTransactionController::class,'installmentReportSearchFilter']);
+    // For ALl Search Use This Route  = Route::post('/hire/installment/groupList/allGrouplistSearch',
+
+    // Installment Details Report
+    Route::post('/hire/installment/detailsReport',[HireTransactionController::class,'installmentDetailsReportFilter']);
+    Route::post('/hire/installment/detailsReport/allSearch',[HireTransactionController::class,'allReportDetailsSearch']);
+
+
+    // Installment Transaction Data Filter Report Show
+
+    Route::post('/hire/installment/search/report',[HireTransactionController::class,'hireInstallmentSearch']);
+    Route::post('/hire/installment/search',[HireTransactionController::class,'allInstallmentSearch']);
+
+
+
+
+    // Sales Summary Report Filter
+    Route::post('/sales/summary/report/filter',[CashSalesController::class,'allSalesSummaryReportFilter']);
+
+
+
+    // Sales Return hire only
+    Route::get('/salesType/wish/show/datas/{sales_type}',[CashSalesController::class,'showAllDetailsSalesType']);  //Sales type Wish Few Data Show Only
+    Route::get('/memberId/wish/show/datas/{invoice_number}',[CashSalesController::class,'invoice_numberWishProductShow']); // Member Id Wish Details show
+    // Sales Return
+
+    Route::post('/custome/return/product',[CustomerSalesReturn::class,'customer_product_return']);
+    Route::get('/customerReturn/prduct/details',[CustomerSalesReturn::class,'return_product_details']);
+    Route::post('/customerReturn/prduct/allSearch',[CustomerSalesReturn::class,'allSearch']);
+    Route::get('/memberId/wish/product/search/{member_id}',[CustomerSalesReturn::class,'memberIdWishProductSearch']);
+    Route::post('/customerReturn/product/filter/search',[CustomerSalesReturn::class,'allFilterSearch']);
+
+    // Sales Return List
+    Route::get('/customerReturn/list',[CustomerSalesReturn::class,'returnProductList']);
+    Route::post('/customerReturn/product/update/{customer_product_return_id}',[CustomerSalesReturn::class,'customerReturnProductUpdate']); // Return Update
+
+    Route::delete('/customerReturn/product/{customer_product_return_id}',[CustomerSalesReturn::class,'customerReturnProductDelete']);
+    Route::post('/customerReturn/memberName/wish/search',[CustomerSalesReturn::class,'customerReturnMemberNameSearch']);
+    Route::post('/customerReturn/filter/search',[CustomerSalesReturn::class,'customerReturnFilterSearch']);
+    Route::get('/customerReturn/eyeView/showData/{customer_product_return_id}',[CustomerSalesReturn::class,'customerReturnEyeViewData']);
 
 
 

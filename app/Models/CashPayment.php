@@ -8,9 +8,8 @@ class CashPayment extends Model
 {
     protected $guarded = [];
 
-    public function cashPayment(){
-
-        return $this->belongsTo(CashSale::class,'cash_id');
+    public function cashSale(){
+        return $this->belongsTo(CashSale::class, 'cash_id');
     }
 
     public function paymentMethod(){

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class InstallmentManage extends Model
+class CustomerProductReturn extends Model
 {
     protected $guarded = [];
 
@@ -12,8 +12,7 @@ class InstallmentManage extends Model
         return $this->belongsTo(MemberManage::class,'member_id');
     }
 
-    public function hireLoanManage(){
-        return $this->belongsTo(HireLoanManagement::class,'hire_loan_manage_id');
+    public function product(){
+        return $this->belongsTo(Product::class,'product_id');
     }
-
 }

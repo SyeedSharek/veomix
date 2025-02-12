@@ -15,10 +15,19 @@ class MemberManage extends Model
         return $this->belongsTo(BloodGroup::class, 'bloodGroup_Id', 'id');
     }
 
+    // public function branchGroup()
+    // {
+    //     return $this->belongsTo(BranchManage::class, 'branchGroup_id', 'id');
+    // }
+
     public function branchGroup()
     {
-        return $this->belongsTo(BranchManage::class, 'branchGroup_id', 'id');
+        return $this->belongsTo(BranchGroup::class, 'banchGroup_id', 'id');
     }
+
+
+
+
 
     public function gender(){
         return $this->belongsTo(Gender::class, 'gender_Id', 'id');

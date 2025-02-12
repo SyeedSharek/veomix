@@ -12,4 +12,8 @@ class WholeProductSalePayment extends Model
         return $this->belongsTo(WholeProductSale::class,'whole_product_sale_id');
     }
 
+    public function paymentMethod(){
+        return $this->belongsTo(PaymentMethod::class,'payment_type_id');
+    }
+
 }

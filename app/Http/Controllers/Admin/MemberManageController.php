@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CashSale;
+use App\Models\HireProductSale;
+use App\Models\InstallmentManage;
 use App\Models\MemberManage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -473,6 +476,92 @@ class MemberManageController extends Controller
                'message' => 'Unauthorized Access'
             ], 400);
         }
+    }
+
+
+
+    public function memberStatementSearchFilter(Request $request){
+        if(Auth::check()){
+            $member_id = $request->input('member_id');
+            $branch_id = $request->input('branch_id');
+            $installment_date = $request->input('installment_date');
+            $updated_at = $request->input('updated_at');
+
+            $cashSales = CashSale::
+             when($member_id, fn($query) => $query->where('member_id', $member_id))
+            ->when($branch_id, fn($query) => $query->where('branch_id', $branch_id))
+            ->when($installment_date, fn($query) => $query->whereDate('created_at', $installment_date))
+            ->when($updated_at, fn($query) => $query->whereDate('updated_at', $updated_at))
+            ->get();
+
+        // Search in HireProductSale Table
+        $hireSales = HireProductSale::when($member_id, fn($query) => $query->where('member_id', $member_id))
+            ->when($branch_id, fn($query) => $query->where('branch_id', $branch_id))
+            ->when($installment_date, fn($query) => $query->whereDate('created_at', $installment_date))
+            ->when($updated_at, fn($query) => $query->whereDate('updated_at', $updated_at))
+            ->get();
+
+        // Search in InstallmentManage Table
+        $installmentQuery = InstallmentManage::with([
+
+            'member',
+            'member.branchGroup',
+            'member.branchGroup.employee',
+            'member.branchGroup.employee.branchName',
+            'hireLoanManage'
+
+        ]);
+
+
+        if ($installment_date && $updated_at) {
+            // Filter sales records where invoice_date is between purchase_date and updated_at
+            $installmentQuery->whereBetween('installment_date', [$installment_date, $updated_at]);
+        }
+
+
+        if ($member_id) {
+            $installmentQuery->whereHas('member', function ($query) use ($member_id) {
+                $query->where('id', $member_id);
+            });
+        }
+
+
+        if ($branch_id) {
+            $installmentQuery->whereHas('member.branchGroup.employee.branchName', function ($query) use ($branch_id) {
+                $query->where('id', $branch_id);
+            });
+        }
+
+
+        $installmentDetails = $installmentQuery->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        if ($installmentDetails->isEmpty()) {
+            return response()->json([
+                'message' => 'Data Not Found',
+            ], 404);
+        }
+
+        return response()->json([
+            'cashSaleDetails' => $installmentDetails,
+        ], 200);
+
+        // Return all data in one response
+        return response()->json([
+            'cash_sales' => $cashSales,
+            'hire_sales' => $hireSales,
+            'hire_installments' => $installmentQuery,
+        ]);
+
+
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthorized Access'
+            ], 400);
+        }
+
     }
 
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Models\Billing;
 use App\Models\BillingDetail;
+use App\Models\ProductStockManagement;
 use App\Models\ReturnProduct;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -66,6 +67,17 @@ class ReturnProductController extends Controller
             }
 
 
+            $productStock = ProductStockManagement::where('product_id', $request->product_id)->first();
+
+                    if ($productStock) {
+                        // Decrement quantity if the product exists
+                        $productStock->decrement('total_product_quantity', $request->return_quantity);
+                    } else {
+                        return response()->json(['message' => 'Stock record not found for this product'], 404);
+                    }
+
+
+
             DB::beginTransaction();
 
             // Calculate new total price after return
@@ -80,6 +92,8 @@ class ReturnProductController extends Controller
                 'subtotal' => $billingDetail->subtotal - $request->return_amount,
                 'avilable_stock_quantity' => $new_quantity
             ]);
+
+
 
 
             $existingReturn = ReturnProduct::where('supplier_id', $request->supplierId)
