@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Account\DepositeAccountController;
+use App\Http\Controllers\Account\WithDrawalAccountController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\DesignationController;
@@ -162,6 +164,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/all/roles',[RoleController::class,'allrole']);
     Route::get('/all/permisisions',[RoleController::class,'allpermisisions']);
     Route::post('/add/role',[RoleController::class,'addRole']);
+
 
 
     // For Frontend Api
@@ -345,7 +348,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/update/member/{id}',[MemberManageController::class,'update']);
     Route::post('/search/member',[MemberManageController::class,'searchMember']);
     Route::post('/search/branch/member',[MemberManageController::class,'getMemberByBranch']);
-    // Route::post('/all/eye/view/{id}',[MemberManageController::class,'eyeViewDetails']);
+    Route::get('/member/eye/view/{member_id}',[MemberManageController::class,'eyeViewDetails']);
     Route::post('/member/close',[MemberManageController::class,'closeMember']);
     Route::post('/member/transfer/group',[MemberManageController::class,'transferGroup']);
     Route::post('/member/memberStatement/search/filter',[MemberManageController::class,'memberStatementSearchFilter']);
@@ -359,6 +362,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/update/productCategory/{id}',[ProductCategoryController::class,'update']);
     Route::post('/search/productCategory',[ProductCategoryController::class,'searchProductCategory']);
     Route::post('statusChange/productCategory/{id}',[ProductCategoryController::class,'statusChange']);
+    Route::get('/productCategory/eye/view/{productCategory_id}',[ProductCategoryController::class,'productCategoryEyeView']);
 
 
     // Product Brand
@@ -369,6 +373,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/search/productBrand',[ProductBrandController::class,'searchProductBrand']);
     Route::post('statusChange/productBrand/{id}',[ProductBrandController::class,'statusChange']);
     Route::post('/statusWise/search/productBrand',[ProductBrandController::class,'statusSearchProductBrand']);
+    Route::get('/productBrand/eye/view/{productBrand_id}',[ProductBrandController::class,'productBrandEyeView']);
 
     // Supplier Route
     Route::get('/all/supplier',[SupplierController::class,'index']);
@@ -570,12 +575,46 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/customerReturn/eyeView/showData/{customer_product_return_id}',[CustomerSalesReturn::class,'customerReturnEyeViewData']);
 
 
+    // Deposits Management ========================
 
+    // Deposite Receive
+
+
+    Route::post('/deposite/receive',[DepositeAccountController::class,'depositeReceive']);
+    Route::get('/deposite/receive/showDetails',[DepositeAccountController::class,'showDepositReceiveDetails']);
+    Route::get('/deposite/receive/showDetails/memberIdWish/{member_id}',[DepositeAccountController::class,'showDetailsMemberIdWish']);
+    Route::post('/deposite/receive/update/{member_receive_id}',[DepositeAccountController::class,'depositeReceiveUpdate']); //member_id
+    Route::post('/deposite/receive/all/search',[DepositeAccountController::class,'allSearch']);
+    Route::delete('/deposite/receive/delete/{member_receive_id}',[DepositeAccountController::class,'deleteDeposite']);  //member_id wish latest delete
+    Route::post('/deposite/receive/reports/filter',[DepositeAccountController::class,'reportDetailsFilter']);
+
+
+
+    // Withdrawal Recive
+
+    Route::post('/withdrawal/receive',[WithDrawalAccountController::class,'withdrawalReceiveStore']);
+    Route::get('/withdrawal/receive/showDetails',[WithDrawalAccountController::class,'showWithdrawalReceiveDetails']);
+    Route::get('/withdrawal/receive/showDetails/{member_id}',[WithDrawalAccountController::class,'showWithdrawalMemberIdWish']);
+    Route::post('/withdrawal/receive/all/search',[WithDrawalAccountController::class,'allSearch']);
+    Route::post('/withdrawal/receive/delete/{member_id}',[WithDrawalAccountController::class,'withdrawalDelete']);  // member_id wish latest delete
+    Route::post('/withdrawal/receive/reports/filter',[WithDrawalAccountController::class,'reportWithdrawalDetailsFilter']);
+    Route::post('/withdrawal/receive/update/{member_id}',[WithDrawalAccountController::class,'withdrawalReceiveUpdate']);
 
 
 
 
     // Company Setting
     Route::post('/store/company/settings',[CompanySettingController::class,'store']);
+    Route::get('/show/company/settings',[CompanySettingController::class,'index']);
+    Route::post('/userSetup/company/settings',[CompanySettingController::class,'userSetup']);
+    Route::get('/userSetup/show/company/settings',[CompanySettingController::class,'userShowDetails']);
+    Route::get('/userSetup/eyeView/show/company/settings/{user_id}',[CompanySettingController::class,'eyeViewUserShowDetails']); // Id wish Eye View Show Details
+    Route::delete('/userSetup/delete/company/settings/{user_id}',[CompanySettingController::class,'userDelete']);
+    Route::post('/userSetup/update/company/settings/{user_id}',[CompanySettingController::class,'userUpdate']);
+    Route::post('/userSetup/allSearch/company/settings',[CompanySettingController::class,'userAllSearch']);
+    Route::get('/userSetup/branchIdWish/company/settings/{branch_Id}',[CompanySettingController::class,'branchIdWishSearch']);
+    Route::post('/userSetup/ListFilter/company/settings',[CompanySettingController::class,'userListFilter']);
+
+
 
 });

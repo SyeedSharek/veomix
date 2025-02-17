@@ -487,71 +487,120 @@ class MemberManageController extends Controller
             $installment_date = $request->input('installment_date');
             $updated_at = $request->input('updated_at');
 
-            $cashSales = CashSale::
-             when($member_id, fn($query) => $query->where('member_id', $member_id))
-            ->when($branch_id, fn($query) => $query->where('branch_id', $branch_id))
-            ->when($installment_date, fn($query) => $query->whereDate('created_at', $installment_date))
-            ->when($updated_at, fn($query) => $query->whereDate('updated_at', $updated_at))
-            ->get();
 
-        // Search in HireProductSale Table
-        $hireSales = HireProductSale::when($member_id, fn($query) => $query->where('member_id', $member_id))
-            ->when($branch_id, fn($query) => $query->where('branch_id', $branch_id))
-            ->when($installment_date, fn($query) => $query->whereDate('created_at', $installment_date))
-            ->when($updated_at, fn($query) => $query->whereDate('updated_at', $updated_at))
-            ->get();
-
-        // Search in InstallmentManage Table
-        $installmentQuery = InstallmentManage::with([
-
-            'member',
-            'member.branchGroup',
-            'member.branchGroup.employee',
-            'member.branchGroup.employee.branchName',
-            'hireLoanManage'
-
-        ]);
+            // Cash Sales Filter
 
 
-        if ($installment_date && $updated_at) {
-            // Filter sales records where invoice_date is between purchase_date and updated_at
-            $installmentQuery->whereBetween('installment_date', [$installment_date, $updated_at]);
-        }
+            $cashSalesQuery = CashSale::with([
+                // 'cashDetails',
+                'cashPayments',
+                'cashPayments.paymentMethod',
+                'cashDetails.product',
+                'cashDetails.product.productCategory',
+                'cashDetails.product.ProductBrand',
+                'member',
+                'member.branchGroup',
+                'member.branchGroup.employee',
+                'member.branchGroup.employee.branchName',
+
+            ]);
+
+            if ($installment_date && $updated_at) {
+                $cashSalesQuery->whereBetween('invoice_date', [$installment_date, $updated_at]);
+            }
+
+            if ($member_id) {
+                $cashSalesQuery->where('member_id', $member_id);
+            }
+
+            if ($branch_id) {
+                $cashSalesQuery->whereHas('member.branchGroup.employee.branchName', function ($query) use ($branch_id) {
+                    $query->where('id', $branch_id);
+                });
+            }
+
+            // Fetch results
+            $cashSales = $cashSalesQuery->paginate(10);
 
 
-        if ($member_id) {
-            $installmentQuery->whereHas('member', function ($query) use ($member_id) {
-                $query->where('id', $member_id);
-            });
-        }
+            // Hire Sales Filter
+
+            $hireSalesQuery = HireProductSale::with([
+
+                // 'hireProductSaleDetail',
+                'hirePayments',
+                'hirePayments.paymentMethod',
+                'hireProductSaleDetail.product',
+                'hireProductSaleDetail.product.productCategory',
+                'hireProductSaleDetail.product.ProductBrand',
+
+                'member',
+                'member.branchGroup',
+                'member.branchGroup.employee',
+                'member.branchGroup.employee.branchName',
+            ]);
+
+            if ($installment_date && $updated_at) {
+                $hireSalesQuery->whereBetween('invoice_date', [$installment_date, $updated_at]);
+            }
+
+            if ($member_id) {
+                $hireSalesQuery->where('member_id', $member_id);
+            }
 
 
-        if ($branch_id) {
-            $installmentQuery->whereHas('member.branchGroup.employee.branchName', function ($query) use ($branch_id) {
-                $query->where('id', $branch_id);
-            });
-        }
+
+            if ($branch_id) {
+                $hireSalesQuery->whereHas('member.branchGroup.employee.branchName', function ($query) use ($branch_id) {
+                    $query->where('id', $branch_id);
+                });
+            }
 
 
-        $installmentDetails = $installmentQuery->orderBy('created_at', 'desc')
-            ->paginate(10);
 
-        if ($installmentDetails->isEmpty()) {
+            $hireSales = $hireSalesQuery->paginate(10);
+
+
+
+            // Installment Filter
+
+            $installmentQuery = InstallmentManage::with([
+
+                'member',
+                'member.branchGroup',
+                'member.branchGroup.employee',
+                'member.branchGroup.employee.branchName',
+                'hireLoanManage'
+
+            ]);
+
+
+            if ($installment_date && $updated_at) {
+
+                $installmentQuery->whereBetween('installment_date', [$installment_date, $updated_at]);
+            }
+
+            if ($member_id) {
+                $installmentQuery->where('member_id', $member_id);
+            }
+
+            if ($branch_id) {
+                $installmentQuery->whereHas('member.branchGroup.employee.branchName', function ($query) use ($branch_id) {
+                    $query->where('id', $branch_id);
+                });
+            }
+
+
+            $installmentDetails = $installmentQuery->paginate(10);
+
+
+
+
             return response()->json([
-                'message' => 'Data Not Found',
-            ], 404);
-        }
-
-        return response()->json([
-            'cashSaleDetails' => $installmentDetails,
-        ], 200);
-
-        // Return all data in one response
-        return response()->json([
-            'cash_sales' => $cashSales,
-            'hire_sales' => $hireSales,
-            'hire_installments' => $installmentQuery,
-        ]);
+                'cashDetails' => $cashSales,
+                'hireDetails' => $hireSales,
+                'installmentDetails' => $installmentDetails
+            ]);
 
 
 
@@ -564,6 +613,37 @@ class MemberManageController extends Controller
 
     }
 
+    public function eyeViewDetails($member_id){
+        if(Auth::check()){
+            $member = MemberManage::with([
+
+                'bloodGroup',
+                'branchGroup',
+                'branchGroup.country',
+                'branchGroup.division',
+                'branchGroup.district',
+                'branchGroup.member',
+                'gender',
+                'religion',
+                'education',
+                'meritalStatus'
+            ])
+                ->where('id', $member_id)
+                ->first();
+
+            return response()->json([
+               'message' => 'Data get successfully',
+                'data' => $member,
+            ]);
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthorized Access'
+            ], 400);
+        }
+
+    }
 
 
 

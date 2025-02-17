@@ -21,7 +21,32 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'full_name',
+        'phone',
+        'description',
+        'employee_id',
+        'branch_id',
+        'user_image',
+        'designation_id',
     ];
+
+    protected $appends = ['user_image_url',];
+    public function getUserImageUrlAttribute()
+    {
+        return asset($this->user_image); // Converts relative path to full URL
+    }
+
+
+    public function employee(){
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+    public function branch(){
+        return $this->belongsTo(BranchManage::class, 'branch_id');
+    }
+
+    public function designation(){
+        return $this->belongsTo(Designation::class, 'designation_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

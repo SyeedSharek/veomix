@@ -245,6 +245,22 @@ class ProductBrandController extends Controller
     }
 
 
+    public function productBrandEyeView($productBrand_id){
+        if(Auth::check()){
+            $brand = ProductBrand::find($productBrand_id)->first();
+            return response()->json([
+                'data' => $brand
+            ]);
+
+
+        }
+        else{
+            return response()->json([
+               'message' => 'Unauthenticated',
+            ], 401);
+        }
+
+    }
 
 
 

@@ -217,6 +217,25 @@ class ProductCategoryController extends Controller
 
 
 
+    public function productCategoryEyeView($productCategory_id){
+        if(Auth::check()){
+            $productCategory = ProductCategory::where('id',$productCategory_id)
+            ->first();
+
+            return response()->json([
+                'productCategory' => $productCategory
+
+            ]);
+
+        }
+
+
+        else{
+            return response()->json([
+               'message' => 'Unauthenticated',
+            ],401);
+        }
+    }
 
 
 
