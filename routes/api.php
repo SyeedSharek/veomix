@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Account\AccountLedgerController;
 use App\Http\Controllers\Account\DepositeAccountController;
 use App\Http\Controllers\Account\WithDrawalAccountController;
+use App\Http\Controllers\Account\LedgerTransactionController;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\DesignationController;
@@ -24,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchGroupController;
 use App\Http\Controllers\CompanySettings\CompanySettingController;
+use App\Http\Controllers\Director\DirectorController;
 use App\Http\Controllers\Distributor\DistributorController;
 use App\Http\Controllers\EmployeeManagement\EmployeeLeaveController;
 use App\Http\Controllers\Product\ProductBrandController;
@@ -42,6 +46,7 @@ use App\Http\Controllers\Sales\CashSalesController;
 use App\Http\Controllers\Sales\CustomerSalesReturn;
 use App\Http\Controllers\Supplier\SupplierController;
 use App\Http\Controllers\WholeSalesController;
+
 
 
 Route::get('/cc', function() {
@@ -601,9 +606,25 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/withdrawal/receive/update/{member_id}',[WithDrawalAccountController::class,'withdrawalReceiveUpdate']);
 
 
+    // Account =====================================
+
+        // Account Ledger-----------
+
+    Route::post('/account/ledger/store',[AccountLedgerController::class,'ledgerStore']);
+    Route::delete('/account/ledger/delete/{account_ledger_id}',[AccountLedgerController::class,'ledgerAcountDelete']);
+    Route::post('/account/ledger/update/{account_ledger_id}',[AccountLedgerController::class,'ledgerAccountUpdate']);
+    Route::get('/account/ledger/ledgerNameWishList/{ledger_id}',[AccountLedgerController::class,'ledgerAccountWishList']);
+    Route::post('/account/ledger/allSearch',[AccountLedgerController::class,'allSearch']);
+    Route::get('/account/ledger/eyeview/{ledger_id}',[AccountLedgerController::class,'eyeViewList']);
+    Route::get('/account/ledger/allShowDetails',[AccountLedgerController::class,'allShowDetails']);
+
+    // Ledger Transaction --------------
+    Route::post('/ledger/transaction/store',[LedgerTransactionController::class,'store']);
 
 
-    // Company Setting
+
+
+    // Company Setting ----------------
     Route::post('/store/company/settings',[CompanySettingController::class,'store']);
     Route::get('/show/company/settings',[CompanySettingController::class,'index']);
     Route::post('/userSetup/company/settings',[CompanySettingController::class,'userSetup']);
@@ -615,6 +636,19 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/userSetup/branchIdWish/company/settings/{branch_Id}',[CompanySettingController::class,'branchIdWishSearch']);
     Route::post('/userSetup/ListFilter/company/settings',[CompanySettingController::class,'userListFilter']);
 
+
+    // Director Setup
+    Route::post('/store/director/settings',[DirectorController::class,'store']);
+    Route::get('/show/director/settings',[DirectorController::class,'index']);
+    Route::post('/director/update/{director_id}',[DirectorController::class,'update']);
+    Route::delete('/director/delete/{director_id}',[DirectorController::class,'destroy']);
+    Route::post('/director/allSearch/settings',[DirectorController::class,'allSearch']);
+    Route::get('/director/eyeView/show/settings/{director_id}',[DirectorController::class,'eyeViewShowDetails']); // Id wish Eye View Show Details
+    Route::post('/director/branchIdWish/settings',[DirectorController::class,'branchIdWishSearch']);
+
+
+
+    // Branch Setup
 
 
 });

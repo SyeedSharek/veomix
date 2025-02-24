@@ -132,66 +132,126 @@ class RoleController extends Controller
     // }
 
 
+    // public function addRole(Request $request)
+    // {
+    //     if (Auth::check()) {
+    //         // Validate the request
+    //         $validation = Validator::make($request->all(), [
+    //             'name' => 'required|string',
+    //             'user_id' => 'required|integer|exists:users,id',
+    //             'branch_id' => 'required|integer|exists:branch_manages,id',
+    //             'permissions' => 'required|array',
+    //         ]);
+
+    //         if ($validation->fails()) {
+    //             return response()->json([
+    //                 'message' => 'Validation Fail',
+    //                 'errors' => $validation->errors()->toArray()
+    //             ], 400);
+    //         }
+
+
+    //         $role = Role::create([
+    //             'name' => $request->name,
+    //             'guard_name' => 'api',
+    //             'user_id' => $request->user_id,
+    //             'branch_id' => $request->branch_id,
+    //         ]);
+
+
+    //         $permissions = $request->permissions;
+
+
+    //         $role->syncPermissions($permissions);
+
+
+    //         $user = User::find($request->user_id);
+
+    //         if ($user) {
+    //             // $user->assignRole($role);
+    //             $user->assignRole($role->name);
+    //         } else {
+    //             return response()->json([
+    //                 'message' => 'User not found'
+    //             ], 404);
+    //         }
+
+    //         return response()->json([
+    //             'message' => 'Role created and assigned successfully',
+    //             'role' => $role,
+    //         ], 201);
+    //     } else {
+    //         return response()->json([
+    //             'message' => 'Unauthorized Access'
+    //         ], 401);
+    //     }
+    // }
+
+
     public function addRole(Request $request)
     {
-        if (Auth::check()) {
-            // Validate the request
-            $validation = Validator::make($request->all(), [
-                'name' => 'required|string',
-                'user_id' => 'required|integer|exists:users,id',
-                'branch_id' => 'required|integer|exists:branch_manages,id',
-                'permissions' => 'required|array',
-            ]);
-
-            if ($validation->fails()) {
-                return response()->json([
-                    'message' => 'Validation Fail',
-                    'errors' => $validation->errors()->toArray()
-                ], 400);
-            }
-
-
-            $role = Role::create([
-                'name' => $request->name,
-                'guard_name' => 'api',
-                'user_id' => $request->user_id,
-                'branch_id' => $request->branch_id,
-            ]);
-
-
-            $permissions = $request->permissions;
-
-
-            if (is_numeric($permissions[0])) {
-
-                $permissions = Permission::whereIn('id', $permissions)->pluck('name')->toArray();
-            } else {
-
-                foreach ($permissions as $permission) {
-                    Permission::firstOrCreate($permission);
-                }
-            }
-
-            $role->syncPermissions($permissions);
-
-          
-            $user = User::find($request->user_id);
-            if ($user) {
-                $user->assignRole($role);
-            } else {
-                return response()->json([
-                    'message' => 'User not found'
-                ], 404);
-            }
-
-            return response()->json([
-                'message' => 'Role created and assigned successfully',
-                'role' => $role,
-            ], 201);
-        } else {
-            return response()->json([
-                'message' => 'Unauthorized Access'
-            ], 401);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized Access'], 401);
         }
+
+        // Validate the request
+        $validation = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'user_id' => 'required|integer|exists:users,id',
+            'branch_id' => 'required|integer|exists:branch_manages,id',
+            'permissions' => 'required|array',
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'message' => 'Validation Fail',
+                'errors' => $validation->errors()->toArray()
+            ], 400);
+        }
+
+        // Create the role
+        $role = Role::create([
+            'name' => $request->name,
+            'guard_name' => 'api',
+            'user_id' => $request->user_id,
+            'branch_id' => $request->branch_id,
+        ]);
+
+        // Convert permission IDs to names if needed
+        $permissions = $request->permissions;
+        if (is_numeric($permissions[0])) {
+            $permissions = Permission::whereIn('id', $permissions)->pluck('name')->toArray();
+        }
+
+        // Assign permissions
+        $role->syncPermissions($permissions);
+
+        $role->syncPermissions($request->permissions);
+
+            // Check if the role was created successfully
+            if ($role) {
+                // Return a response indicating success
+                return response()->json([
+                    'message' => 'Role created and assigned successfully',
+                    'role' => $role,
+                ], 201);
+            }
+
+            // If the role creation fails, return a response indicating that
+            // return $this->Response(false, "Role not added.", 400);
+
+        // Find user and assign role
+        $user = User::find($request->user_id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        // Assign role by name
+        $user->assignRole($role->name);
+
+        return response()->json([
+            'message' => 'Role do not  created and assigned',
+            'role' => $role,
+        ], 201);
     }
 }
