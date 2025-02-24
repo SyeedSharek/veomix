@@ -19,6 +19,8 @@ return new class extends Migration
             $table->date('transaction_date');
             $table->string('doc_number_or_check');
             $table->string('current_balance');
+            $table->string('receive_payer_name');
+            $table->string('receive_payer_phone');
             $table->timestamps();
         });
     }

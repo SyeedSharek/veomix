@@ -621,6 +621,14 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     // Ledger Transaction --------------
     Route::post('/ledger/transaction/store',[LedgerTransactionController::class,'store']);
 
+    Route::get('/ledger/transaction/show',[LedgerTransactionController::class,'ledgerTransactionIndex']);
+    // Route::delete('/ledger/transaction/delete/{ledger_transaction_id}',[LedgerTransactionController::class,'ledgerTransactionDelete']);
+    Route::post('/ledger/transaction/update/{ledger_transaction_id}',[LedgerTransactionController::class,'ledgerTransactionUpdate']);
+    Route::post('/ledger/transaction/allSearch/filter',[LedgerTransactionController::class,'ledgerTransactionAllSearch']);
+    Route::post('/ledger/transaction/ledgerId/wish/search',[LedgerTransactionController::class,'transtionLedgerIdWishSearch']);
+    Route::get('/ledger/transaction/eyeview/{ledger_transaction_id}',[LedgerTransactionController::class,'ledgerTransactionEyeViewList']);
+
+
 
 
 

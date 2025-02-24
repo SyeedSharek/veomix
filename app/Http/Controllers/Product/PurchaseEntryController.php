@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Models\Billing;
 use App\Models\BillingDetail;
+use App\Models\DebitAccount;
 use App\Models\PaymentDetail;
 use App\Models\ProductStockManagement;
 use App\Models\PurchaseBillingDetails;
@@ -119,6 +120,7 @@ class PurchaseEntryController extends Controller
             DB::beginTransaction();
             try {
                 // Step 1: Create Billing Entry
+                // $total_due = $request->total_amount - $request->customer_paid_amount;
                 $billing = Billing::create([
                     'supplier_id' => $request->supplier_id,
                     'voucher_number' => $request->voucher_number,
@@ -127,6 +129,7 @@ class PurchaseEntryController extends Controller
                     'product_warrenty_date' => $request->product_warrenty_date,
                     'customer_paid_amount' => $request->customer_paid_amount,
                     'entry_user_name' => $authName,
+                    // 'due_amount' => $total_due,
 
 
                 ]);
@@ -176,6 +179,25 @@ class PurchaseEntryController extends Controller
                     'invoice_discount' => $request->invoice_discount,
                     'status' => ($request->customer_paid_amount >= $request->total_amount) ? '1' : '0',
                 ]);
+
+
+                // insert in Debit Account
+                $total_debit_account = DebitAccount::latest()->value('total_debit_amount') ?? 0;
+                $total_debit_account += ($request->total_amount ?? 0);
+
+                DebitAccount::create([
+                    'supplier_id' => $request->supplier_id,
+                    'total_product_purchase_amount' => $request->total_amount,
+                    'due_product_amount' => $due_amount,
+                    'total_debit_amount' => $total_debit_account
+
+                ]);
+
+
+
+
+
+
 
                 DB::commit();
 
@@ -263,6 +285,124 @@ class PurchaseEntryController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // public function paymentUpdateWithBilling(Request $request, $paymentId)
+    // {
+    //     if (!Auth::check()) {
+    //         return response()->json(['message' => 'Unauthorized'], 400);
+    //     }
+
+    //     $authName = auth()->user()->name;
+
+    //     // Validate Request
+    //     $request->validate([
+    //         'supplier_id' => 'required|integer',
+    //         'voucher_number' => 'required|string',
+    //         'products' => 'required|array',
+    //         'products.*.product_id' => 'required|integer|exists:products,id',
+    //         'products.*.quantity' => 'required|integer|min:1',
+    //         'products.*.price' => 'required|numeric|min:0',
+    //         'total_amount' => 'required|numeric|min:0',
+    //         'customer_paid_amount' => 'required|numeric|min:0',
+    //         'payment_method_id' => 'required|integer',
+    //         'invoice_discount' => 'nullable|string',
+    //         'purchase_date' => 'required|date_format:d/m/Y',
+    //         'product_warrenty_date' => 'required|date_format:d/m/Y',
+    //         'customer_due_balance' => 'nullable|string',
+    //     ]);
+
+    //     // Convert date format
+    //     $request->merge([
+    //         'purchase_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->purchase_date)->format('Y-m-d'),
+    //         'product_warrenty_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->product_warrenty_date)->format('Y-m-d'),
+    //     ]);
+
+    //     DB::beginTransaction();
+    //     try {
+    //         // Step 1: Find existing payment record
+    //         $paymentDetail = PaymentDetail::findOrFail($paymentId);
+
+
+    //         $billing = $paymentDetail->billing;
+
+    //         if (!$billing) {
+    //             throw new \Exception("Billing record not found.");
+    //         }
+
+
+
+    //         // Step 3: Update Billing Record
+    //         $billing->update([
+    //             'supplier_id' => $request->supplier_id,
+    //             'voucher_number' => $request->voucher_number,
+    //             'total_amount' => $request->total_amount,
+    //             'purchase_date' => $request->purchase_date,
+    //             'product_warrenty_date' => $request->product_warrenty_date,
+    //             'customer_paid_amount' => $request->customer_paid_amount,
+    //             'update_by_name' => $authName,
+
+    //         ]);
+
+    //         // Step 4: Delete existing billing details
+    //         $billing->billingDetails()->delete();
+
+    //         // Step 5: Insert updated billing details (Loop through products)
+    //         foreach ($request->products as $product) {
+    //             BillingDetail::create([
+    //                 'billing_id' => $billing->id,
+    //                 'product_id' => $product['product_id'],
+    //                 'quantity' => $product['quantity'],
+    //                 'price' => $product['price'],
+    //                 'avilable_stock_quantity' => $product['quantity'],
+    //                 'subtotal' => $product['quantity'] * $product['price'],
+    //             ]);
+    //         }
+
+    //         // Step 6: Update Payment Details
+    //         $due_amount = $request->total_amount - $request->customer_paid_amount;
+
+    //         $paymentDetail->update([
+    //             'customer_paid_amount' => $request->customer_paid_amount,
+    //             'customer_due_balance' => $due_amount,
+    //             'payment_method_id' => $request->payment_method_id,
+    //             'invoice_discount' => $request->invoice_discount,
+    //             'status' => ($request->customer_paid_amount >= $request->total_amount) ? '1' : '0',
+    //         ]);
+
+
+    //         $total_debit_account = DebitAccount::latest()->value('total_debit_amount') ?? 0;
+    //         $total_debit_account += ($request->total_amount ?? 0);
+    //         $due_amount = $request->total_amount - $request->customer_paid_amount;
+
+    //         DebitAccount::update([
+    //             'supplier_id' => $request->supplier_id,
+    //             'total_product_purchase_amount'=>$request->total_amount,
+    //             'due_product_amount' => $due_amount,
+    //             'total_debit_amount' => $total_debit_account,
+    //             'due_product_amount' => $due_amount
+
+    //         ]);
+
+
+
+
+
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'message' => 'Payment and billing updated successfully',
+    //             'billing_id' => $billing->id
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'message' => 'Error updating payment',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
     public function paymentUpdateWithBilling(Request $request, $paymentId)
     {
         if (!Auth::check()) {
@@ -288,25 +428,27 @@ class PurchaseEntryController extends Controller
             'customer_due_balance' => 'nullable|string',
         ]);
 
-        // Convert date format
-        $request->merge([
-            'purchase_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->purchase_date)->format('Y-m-d'),
-            'product_warrenty_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->product_warrenty_date)->format('Y-m-d'),
-        ]);
+        // Convert date format safely
+        try {
+            $request->merge([
+                'purchase_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->purchase_date)->format('Y-m-d'),
+                'product_warrenty_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->product_warrenty_date)->format('Y-m-d'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Invalid date format. Use d/m/Y'], 422);
+        }
 
         DB::beginTransaction();
         try {
             // Step 1: Find existing payment record
             $paymentDetail = PaymentDetail::findOrFail($paymentId);
-
-
             $billing = $paymentDetail->billing;
 
             if (!$billing) {
                 throw new \Exception("Billing record not found.");
             }
 
-            // Step 3: Update Billing Record
+            // Step 2: Update Billing Record
             $billing->update([
                 'supplier_id' => $request->supplier_id,
                 'voucher_number' => $request->voucher_number,
@@ -317,21 +459,22 @@ class PurchaseEntryController extends Controller
                 'update_by_name' => $authName,
             ]);
 
-            // Step 4: Delete existing billing details
+            // Step 3: Delete existing billing details
             $billing->billingDetails()->delete();
 
-            // Step 5: Insert updated billing details (Loop through products)
+            // Step 4: Insert updated billing details
             foreach ($request->products as $product) {
                 BillingDetail::create([
                     'billing_id' => $billing->id,
                     'product_id' => $product['product_id'],
                     'quantity' => $product['quantity'],
                     'price' => $product['price'],
+                    'avilable_stock_quantity' => $product['quantity'],
                     'subtotal' => $product['quantity'] * $product['price'],
                 ]);
             }
 
-            // Step 6: Update Payment Details
+            // Step 5: Update Payment Details
             $due_amount = $request->total_amount - $request->customer_paid_amount;
 
             $paymentDetail->update([
@@ -341,6 +484,29 @@ class PurchaseEntryController extends Controller
                 'invoice_discount' => $request->invoice_discount,
                 'status' => ($request->customer_paid_amount >= $request->total_amount) ? '1' : '0',
             ]);
+
+            // Step 6: Update Debit Account (Fixing the Error)
+            $total_debit_account = DebitAccount::latest()->value('total_debit_amount') ?? 0;
+            $total_debit_account += ($request->total_amount ?? 0);
+
+            $debitAccount = DebitAccount::where('supplier_id', $request->supplier_id)->first();
+
+            if ($debitAccount) {
+                // Update existing record
+                $debitAccount->update([
+                    'total_product_purchase_amount' => $request->total_amount,
+                    'due_product_amount' => $due_amount,
+                    'total_debit_amount' => $total_debit_account,
+                ]);
+            } else {
+                // Create new record if not found
+                DebitAccount::create([
+                    'supplier_id' => $request->supplier_id,
+                    'total_product_purchase_amount' => $request->total_amount,
+                    'due_product_amount' => $due_amount,
+                    'total_debit_amount' => $total_debit_account,
+                ]);
+            }
 
             DB::commit();
 
@@ -356,6 +522,7 @@ class PurchaseEntryController extends Controller
             ], 500);
         }
     }
+
 
 
     /**

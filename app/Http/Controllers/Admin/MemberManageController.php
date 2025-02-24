@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CashSale;
+use App\Models\CreditAccount;
 use App\Models\HireProductSale;
 use App\Models\InstallmentManage;
 use App\Models\MemberManage;
@@ -21,7 +22,7 @@ class MemberManageController extends Controller
     public function index()
     {
         if (Auth::check()) {
-            $data = MemberManage::with(['branchGroup','bloodGroup','gender','religion','education','meritalStatus'])->latest()->get();
+            $data = MemberManage::with(['branchGroup', 'bloodGroup', 'gender', 'religion', 'education', 'meritalStatus'])->latest()->get();
             return response()->json([
                 'message' => 'Data get successfully',
                 'data' => $data,
@@ -44,120 +45,265 @@ class MemberManageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(Request $request)
+    // {
+    //     if (Auth::check()) {
+
+    //         $request->merge([
+    //             'openingDate' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->openingDate)->format('Y-m-d'),
+    //             'dataOfBirth' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->dataOfBirth)->format('Y-m-d'),
+    //         ]);
+
+    //         $random_id = rand(1000, 9999);
+
+    //         while (MemberManage::where('member_card_id', $random_id)->exists()) {
+
+    //             $random_id = rand(1000, 9999);
+    //         }
+
+
+
+    //         $validator = Validator::make($request->all(), [
+    //             'member_card_id' => 'unique:members,member_card_id',
+    //             'memberName_english' => 'required|string',
+    //             'memberName_bangla' => 'required|string',
+    //             'banchGroup_id' => 'nullable|exists:branch_groups,id',
+    //             'phoneNumber' => 'required|string',
+    //             'fatherName' => 'required|string',
+    //             'motherName' => 'required|string',
+    //             'spouseName' => 'nullable|string',
+    //             'openingDate' => 'required|date_format:d/m/Y',
+    //             'refferedBy' => 'nullable|string',
+    //             'nationaId' => 'nullable|string',
+    //             'birthCertificate' => 'nullable|string',
+    //             'email' => 'nullable|email',
+    //             'bloodGroup_Id' => 'nullable|exists:blood_groups,id',
+    //             'gender_Id' => 'required|exists:genders,id',
+    //             'religion_id' => 'nullable|exists:riligions,id',
+    //             'maritalStatus_id' => 'nullable|exists:marital_statuses,id',
+    //             'dataOfBirth' => 'nullable|date_format:d/m/Y',
+    //             'present_address' => 'required|string|max:500',
+    //             'permanent_address' => 'required|string|max:500',
+    //             'monthlyIncome' => 'required|string|max:100',
+    //             'education_id' => 'nullable|exists:education,id',
+    //             'profession' => 'required|string|max:255',
+    //             'admissionFees' => 'nullable|numeric',
+    //             'otherFees' => 'nullable|numeric',
+    //             'member_profiles' => 'nullable',
+    //             'member_signature' => 'nullable',
+    //             'nomineeName' => 'required|string|max:255',
+    //             'nomineeFather' => 'nullable|string|max:255',
+    //             'nomineeMother' => 'nullable|string|max:255',
+    //             'nomineePhone' => 'nullable|string|max:15',
+    //             'nomineeRelation' => 'nullable|string|max:255',
+    //             'nomineeNationId' => 'nullable|string|max:50',
+    //             'nomineeAddress' => 'nullable|string|max:500',
+    //             'nomineeComments' => 'nullable|string|max:500',
+    //             'nomineeImage' => 'nullable',
+    //             'nomineeSignature' => 'nullable',
+    //         ]);
+
+
+    //         if ($validator->fails()) {
+    //             return response()->json([
+    //                 'message' => 'Validation errors',
+    //                 'errors' => $validator->errors(),
+    //             ], 422);
+    //         }
+
+    //         $request->merge([
+    //             'dataOfBirth' => Carbon::createFromFormat('d/m/Y', $request->dataOfBirth)->format('Y-m-d'),
+    //             'openingDate' => Carbon::createFromFormat('d/m/Y', $request->openingDate)->format('Y-m-d'),
+
+    //         ]);
+
+
+    //         $data = $request->except(['member_profiles', 'member_signature', 'nomineeImage', 'nomineeSignature']);
+
+    //         if ($request->hasFile('member_profiles')) {
+    //             $image = $request->file('member_profiles');
+    //             $imageName = time() . '.' . $image->getClientOriginalExtension();
+    //             $image->move(public_path('member/memberProfile'), $imageName);
+    //             // $imageName = 'employee/profile'. $imageName;
+    //             $data['member_profiles'] = 'member/memberProfile/' . $imageName;
+    //         }
+
+    //         if ($request->hasFile('member_signature')) {
+    //             $image = $request->file('member_signature');
+    //             $imageName = time() . '.' . $image->getClientOriginalExtension();
+    //             $image->move(public_path('member/membersignature'), $imageName);
+    //             // $imageName = 'employee/profile'. $imageName;
+    //             $data['member_signature'] = 'member/membersignature/' . $imageName;
+    //         }
+
+    //         if ($request->hasFile('nomineeImage')) {
+    //             $image = $request->file('nomineeImage');
+    //             $imageName = time() . '.' . $image->getClientOriginalExtension();
+    //             $image->move(public_path('member/nominee'), $imageName);
+    //             // $imageName = 'employee/profile'. $imageName;
+    //             $data['nomineeImage'] = 'member/nominee/' . $imageName;
+    //         }
+
+    //         if ($request->hasFile('nomineeSignature')) {
+    //             $image = $request->file('nomineeSignature');
+    //             $imageName = time() . '.' . $image->getClientOriginalExtension();
+    //             $image->move(public_path('member/nomieSignature'), $imageName);
+    //             // $imageName = 'employee/profile'. $imageName;
+    //             $data['nomineeSignature'] = 'member/nomieSignature/' . $imageName;
+    //         }
+    //         $data['member_card_id'] = $random_id;
+
+    //         $member = MemberManage::create($data);
+
+
+
+    //         $total_credit_account = CreditAccount::latest()->value('total_credit_amount') ?? 0;
+    //         $total_credit_account += $request->admissionFees + $request->otherFees;
+    //         CreditAccount::create([
+    //             'total_credit_amount' => $total_credit_account,
+    //             'admission_fee' => $request->admissionFees,
+    //             'other_fee' => $request->otherFees,
+    //              'member_id' => $member->id,
+    //         ]);
+
+
+
+    //         return response()->json([
+    //             'message' => 'Data created successfully!!',
+    //             'data' => $member,
+    //         ]);
+    //     } else {
+    //         return response()->json([
+    //             'error' => 'Unauthorized Access'
+    //         ], 400);
+    //     }
+    // }
+
+
     public function store(Request $request)
     {
-        if (Auth::check()) {
-
-            $request->merge([
-                'openingDate' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->openingDate)->format('Y-m-d'),
-                'dataOfBirth' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->dataOfBirth)->format('Y-m-d'),
-            ]);
-
-            $random_id = rand(1000, 9999);
-
-            while (MemberManage::where('member_card_id', $random_id)->exists()) {
-
-                $random_id = rand(1000, 9999);
-            }
-
-
-
-            $validator = Validator::make($request->all(), [
-                'member_card_id' => 'unique:members,member_card_id',
-                'memberName_english' => 'required|string',
-                'memberName_bangla' => 'required|string',
-                'banchGroup_id' => 'nullable|exists:branch_groups,id',
-                'phoneNumber' => 'required|string',
-                'fatherName' => 'required|string',
-                'motherName' => 'required|string',
-                'spouseName' => 'nullable|string',
-                'openingDate' => 'required|date',
-                'refferedBy' => 'nullable|string',
-                'nationaId' => 'nullable|string',
-                'birthCertificate' => 'nullable|string',
-                'email' => 'nullable|email',
-                'bloodGroup_Id' => 'nullable|exists:blood_groups,id',
-                'gender_Id' => 'required|exists:genders,id',
-                'religion_id' => 'nullable|exists:riligions,id',
-                'maritalStatus_id' => 'nullable|exists:marital_statuses,id',
-                'dataOfBirth' => 'nullable|date',
-                'present_address' => 'required|string|max:500',
-                'permanent_address' => 'required|string|max:500',
-                'monthlyIncome' => 'required|string|max:100',
-                'education_id' => 'nullable|exists:education,id',
-                'profession' => 'required|string|max:255',
-                'admissionFees' => 'nullable|numeric',
-                'otherFees' => 'nullable|numeric',
-                'member_profiles' => 'nullable',
-                'member_signature' => 'nullable',
-                'nomineeName' => 'required|string|max:255',
-                'nomineeFather' => 'nullable|string|max:255',
-                'nomineeMother' => 'nullable|string|max:255',
-                'nomineePhone' => 'nullable|string|max:15',
-                'nomineeRelation' => 'nullable|string|max:255',
-                'nomineeNationId' => 'nullable|string|max:50',
-                'nomineeAddress' => 'nullable|string|max:500',
-                'nomineeComments' => 'nullable|string|max:500',
-                'nomineeImage' => 'nullable',
-                'nomineeSignature' => 'nullable',
-            ]);
-
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation errors',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-
-
-            $data = $request->except(['member_profiles', 'member_signature', 'nomineeImage', 'nomineeSignature']);
-
-            if ($request->hasFile('member_profiles')) {
-                $image = $request->file('member_profiles');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('member/memberProfile'), $imageName);
-                // $imageName = 'employee/profile'. $imageName;
-                $data['member_profiles'] = 'member/memberProfile/' . $imageName;
-            }
-
-            if ($request->hasFile('member_signature')) {
-                $image = $request->file('member_signature');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('member/membersignature'), $imageName);
-                // $imageName = 'employee/profile'. $imageName;
-                $data['member_signature'] = 'member/membersignature/' . $imageName;
-            }
-
-            if ($request->hasFile('nomineeImage')) {
-                $image = $request->file('nomineeImage');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('member/nominee'), $imageName);
-                // $imageName = 'employee/profile'. $imageName;
-                $data['nomineeImage'] = 'member/nominee/' . $imageName;
-            }
-
-            if ($request->hasFile('nomineeSignature')) {
-                $image = $request->file('nomineeSignature');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('member/nomieSignature'), $imageName);
-                // $imageName = 'employee/profile'. $imageName;
-                $data['nomineeSignature'] = 'member/nomieSignature/' . $imageName;
-            }
-            $data['member_card_id'] = $random_id;
-
-            $member = MemberManage::create($data);
-
-            return response()->json([
-                'message' => 'Data created successfully!!',
-                'data' => $member,
-            ]);
-        } else {
-            return response()->json([
-                'error' => 'Unauthorized Access'
-            ], 400);
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized Access'], 401);
         }
+
+        // Generate unique member_card_id
+        $random_id = rand(1000, 9999);
+        while (MemberManage::where('member_card_id', $random_id)->exists()) {
+            $random_id = rand(1000, 9999);
+        }
+
+        // Validate Request
+        $validator = Validator::make($request->all(), [
+            'member_card_id' => 'unique:members,member_card_id',
+            'memberName_english' => 'required|string',
+            'memberName_bangla' => 'required|string',
+            'banchGroup_id' => 'nullable|exists:branch_groups,id',
+            'phoneNumber' => 'required|string',
+            'fatherName' => 'required|string',
+            'motherName' => 'required|string',
+            'spouseName' => 'nullable|string',
+            'openingDate' => 'required|date_format:d/m/Y',
+            'refferedBy' => 'nullable|string',
+            'nationaId' => 'nullable|string',
+            'birthCertificate' => 'nullable|string',
+            'email' => 'nullable|email',
+            'bloodGroup_Id' => 'nullable|exists:blood_groups,id',
+            'gender_Id' => 'required|exists:genders,id',
+            'religion_id' => 'nullable|exists:riligions,id',
+            'maritalStatus_id' => 'nullable|exists:marital_statuses,id',
+            'dataOfBirth' => 'nullable|date_format:d/m/Y',
+            'present_address' => 'required|string|max:500',
+            'permanent_address' => 'required|string|max:500',
+            'monthlyIncome' => 'required|string|max:100',
+            'education_id' => 'nullable|exists:education,id',
+            'profession' => 'required|string|max:255',
+            'admissionFees' => 'nullable|numeric',
+            'otherFees' => 'nullable|numeric',
+            'member_profiles' => 'nullable|image',
+            'member_signature' => 'nullable|image',
+            'nomineeName' => 'required|string|max:255',
+            'nomineeFather' => 'nullable|string|max:255',
+            'nomineeMother' => 'nullable|string|max:255',
+            'nomineePhone' => 'nullable|string|max:15',
+            'nomineeRelation' => 'nullable|string|max:255',
+            'nomineeNationId' => 'nullable|string|max:50',
+            'nomineeAddress' => 'nullable|string|max:500',
+            'nomineeComments' => 'nullable|string|max:500',
+            'nomineeImage' => 'nullable|image',
+            'nomineeSignature' => 'nullable|image',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        // Handle date conversion safely using try-catch
+        try {
+            $request->merge([
+                'openingDate' => Carbon::createFromFormat('d/m/Y', $request->openingDate)->format('Y-m-d'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Invalid format for openingDate. Use d/m/Y'], 422);
+        }
+
+        try {
+            $request->merge([
+                'dataOfBirth' => Carbon::createFromFormat('d/m/Y', $request->dataOfBirth)->format('Y-m-d'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Invalid format for dataOfBirth. Use d/m/Y'], 422);
+        }
+
+        // Exclude image fields from direct insertion
+        $data = $request->except(['member_profiles', 'member_signature', 'nomineeImage', 'nomineeSignature']);
+
+        // Handle File Uploads
+        $fileFields = [
+            'member_profiles' => 'member/memberProfile',
+            'member_signature' => 'member/membersignature',
+            'nomineeImage' => 'member/nominee',
+            'nomineeSignature' => 'member/nomieSignature'
+        ];
+
+        foreach ($fileFields as $field => $path) {
+            if ($request->hasFile($field)) {
+                $image = $request->file($field);
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path($path), $imageName);
+                $data[$field] = "$path/$imageName";
+            }
+        }
+
+        // Assign unique member_card_id
+        $data['member_card_id'] = $random_id;
+
+        // Create Member Record
+        $member = MemberManage::create($data);
+
+        // Update total_credit_amount correctly
+        try {
+            $total_credit_account = CreditAccount::latest()->value('total_credit_amount') ?? 0;
+            $total_credit_account += ($request->admissionFees ?? 0) + ($request->otherFees ?? 0);
+
+            CreditAccount::create([
+                'total_credit_amount' => $total_credit_account,
+                'admission_fee' => $request->admissionFees ?? 0,
+                'other_fee' => $request->otherFees ?? 0,
+                'member_id' => $member->id,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update credit account', 'message' => $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'message' => 'Data created successfully!!',
+            'data' => $member,
+        ]);
     }
+
 
     /**
      * Display the specified resource.
@@ -311,7 +457,6 @@ class MemberManageController extends Controller
                     'message' => 'Data updated successfully!',
                     'data' => $member,
                 ]);
-
             }
         } else {
             return response()->json([
@@ -410,26 +555,26 @@ class MemberManageController extends Controller
     }
 
 
-    public function memberShow(){
-        if(Auth::check()){
+    public function memberShow()
+    {
+        if (Auth::check()) {
             $members = MemberManage::all();
             return response()->json([
-               'message' => 'Data get successfully',
+                'message' => 'Data get successfully',
                 'data' => $members,
             ]);
-
-        }
-        else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized Access'
+                'message' => 'Unauthorized Access'
             ], 400);
         }
     }
 
 
 
-    public function closeMember(Request $request){
-        if(Auth::check()){
+    public function closeMember(Request $request)
+    {
+        if (Auth::check()) {
 
             $id = $request->id;
             $reason = $request->close_reason;
@@ -439,24 +584,21 @@ class MemberManageController extends Controller
             $member->closing_reason = $reason;
             $member->save();
             return response()->json([
-               'message' => 'Member closed successfully',
+                'message' => 'Member closed successfully',
                 'data' => $member,
             ]);
-
-
-
-        }
-        else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized Access'
+                'message' => 'Unauthorized Access'
             ], 400);
         }
     }
 
 
 
-    public function transferGroup(Request $request){
-        if(Auth::check()){
+    public function transferGroup(Request $request)
+    {
+        if (Auth::check()) {
             $id = $request->member_id;
             $transfer_reason = $request->transfer_reason;
             $branch_group_id = $request->branch_group_id;
@@ -465,23 +607,21 @@ class MemberManageController extends Controller
             $member->transfer_reason = $transfer_reason;
             $member->save();
             return response()->json([
-               'message' => 'Member transfer successfully',
+                'message' => 'Member transfer successfully',
                 'data' => $member,
             ]);
-
-
-        }
-        else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized Access'
+                'message' => 'Unauthorized Access'
             ], 400);
         }
     }
 
 
 
-    public function memberStatementSearchFilter(Request $request){
-        if(Auth::check()){
+    public function memberStatementSearchFilter(Request $request)
+    {
+        if (Auth::check()) {
             $member_id = $request->input('member_id');
             $branch_id = $request->input('branch_id');
             $installment_date = $request->input('installment_date');
@@ -601,20 +741,16 @@ class MemberManageController extends Controller
                 'hireDetails' => $hireSales,
                 'installmentDetails' => $installmentDetails
             ]);
-
-
-
-        }
-        else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized Access'
+                'message' => 'Unauthorized Access'
             ], 400);
         }
-
     }
 
-    public function eyeViewDetails($member_id){
-        if(Auth::check()){
+    public function eyeViewDetails($member_id)
+    {
+        if (Auth::check()) {
             $member = MemberManage::with([
 
                 'bloodGroup',
@@ -632,36 +768,13 @@ class MemberManageController extends Controller
                 ->first();
 
             return response()->json([
-               'message' => 'Data get successfully',
+                'message' => 'Data get successfully',
                 'data' => $member,
             ]);
-
-        }
-        else{
+        } else {
             return response()->json([
-               'message' => 'Unauthorized Access'
+                'message' => 'Unauthorized Access'
             ], 400);
         }
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-

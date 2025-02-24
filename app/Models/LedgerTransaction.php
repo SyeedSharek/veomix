@@ -15,4 +15,12 @@ class LedgerTransaction extends Model
     public function accountTransactionLedger(){
         return $this->belongsTo(AccountLedger::class,'transaction_ledger_id');
     }
+
+    public function debitAccount(){
+        return $this->hasMany(DebitAccount::class,'ledger_transaction_id');
+    }
+
+    public function creditAccount(){
+        return $this->hasMany(CreditAccount::class,'ledger_transaction_id');
+    }
 }
