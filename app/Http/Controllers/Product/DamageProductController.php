@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Models\Billing;
 use App\Models\BillingDetail;
+use App\Models\CreditAccount;
 use App\Models\DamageProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -100,6 +101,15 @@ class DamageProductController extends Controller
                 'total_product_sub_total' => $total_product_sub_total,
                 'entry_by' => $auth_user,
             ]);
+
+
+            $credit = CreditAccount::create([
+                'supplier_id' => $request->supplier_id,
+                'damage_amount' => $request->damage_amount,
+                'transaction_report_id' => 1,
+            ]);
+
+
 
             return response()->json([
                 'success' => true,

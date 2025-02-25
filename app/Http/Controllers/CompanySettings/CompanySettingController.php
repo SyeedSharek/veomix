@@ -409,4 +409,75 @@ class CompanySettingController extends Controller
     }
 
 
+    public function storeBasicInformation(Request $request)
+    {
+        if(Auth::check()){
+            $validator = Validator::make($request->all(),[
+                'full_name' => 'required|string',
+                'phone' => 'required|string',
+                'email' => 'required|string',
+                'date_of_birth' => 'required|date_format:d/m/Y',
+                'nid_number' => 'required|string',
+                'nid_front_image' => 'required|string',
+                'nid_back_image' => 'required|string',
+                'present_address' => 'required|string',
+                'image' => 'required|string',
+
+            ]);
+
+        }
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+
+        if ($request->hasFile('nid_front_image')) {
+            $image = $request->file('nid_front_image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('basicInformation/nid_front_image'), $imageName);
+            // $imageName = 'employee/profile'. $imageName;
+            $data['nid_front_image'] = 'basicInformation/nid_front_image/' . $imageName;
+        }
+
+
+        if ($request->hasFile('nid_back_image')) {
+            $image = $request->file('nid_back_image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('basicInformation/nid_back_image'), $imageName);
+            // $imageName = 'employee/profile'. $imageName;
+            $data['nid_back_image'] = 'basicInformation/nid_front_image/' . $imageName;
+        }
+
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('basicInformation/image/image'), $imageName);
+            // $imageName = 'employee/profile'. $imageName;
+            $data['image'] = 'basicInformation/image/' . $imageName;
+        }
+
+        else{
+            return response()->json([
+                'error' => 'Unauthorized',
+            ], 401);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

@@ -285,14 +285,15 @@ class MemberManageController extends Controller
 
         // Update total_credit_amount correctly
         try {
-            $total_credit_account = CreditAccount::latest()->value('total_credit_amount') ?? 0;
-            $total_credit_account += ($request->admissionFees ?? 0) + ($request->otherFees ?? 0);
+            // $total_credit_account = CreditAccount::latest()->value('total_credit_amount') ?? 0;
+            // $total_credit_account += ($request->admissionFees ?? 0) + ($request->otherFees ?? 0);
 
             CreditAccount::create([
-                'total_credit_amount' => $total_credit_account,
+                // 'total_credit_amount' => $total_credit_account,
                 'admission_fee' => $request->admissionFees ?? 0,
                 'other_fee' => $request->otherFees ?? 0,
                 'member_id' => $member->id,
+                'transaction_report_id' => 1
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to update credit account', 'message' => $e->getMessage()], 500);

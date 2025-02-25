@@ -564,7 +564,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/memberId/wish/show/datas/{invoice_number}',[CashSalesController::class,'invoice_numberWishProductShow']); // Member Id Wish Details show
     // Sales Return
 
-    Route::post('/custome/return/product',[CustomerSalesReturn::class,'customer_product_return']);
+    Route::post('/customer/return/product',[CustomerSalesReturn::class,'customer_product_return']);
     Route::get('/customerReturn/prduct/details',[CustomerSalesReturn::class,'return_product_details']);
     Route::post('/customerReturn/prduct/allSearch',[CustomerSalesReturn::class,'allSearch']);
     Route::get('/memberId/wish/product/search/{member_id}',[CustomerSalesReturn::class,'memberIdWishProductSearch']);
@@ -618,7 +618,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/account/ledger/eyeview/{ledger_id}',[AccountLedgerController::class,'eyeViewList']);
     Route::get('/account/ledger/allShowDetails',[AccountLedgerController::class,'allShowDetails']);
 
-    // Ledger Transaction --------------
+    // Acount  Ledger Transaction --------------
     Route::post('/ledger/transaction/store',[LedgerTransactionController::class,'store']);
 
     Route::get('/ledger/transaction/show',[LedgerTransactionController::class,'ledgerTransactionIndex']);
@@ -629,6 +629,15 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::get('/ledger/transaction/eyeview/{ledger_transaction_id}',[LedgerTransactionController::class,'ledgerTransactionEyeViewList']);
 
 
+    // Account Transaction LIst ==============
+
+Route::post('/ledger/transaction/list/filter',[LedgerTransactionController::class,'transtionListFilter']);
+
+// Ledger Report ===========
+Route::post('/ledger/list/filter',[LedgerTransactionController::class,'ledgerReportFilter']);
+
+ // Ledger Report List
+ Route::post('/ledger/report/list',[LedgerTransactionController::class,'ledgerReportList']);
 
 
 
@@ -643,6 +652,17 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function() {
     Route::post('/userSetup/allSearch/company/settings',[CompanySettingController::class,'userAllSearch']);
     Route::get('/userSetup/branchIdWish/company/settings/{branch_Id}',[CompanySettingController::class,'branchIdWishSearch']);
     Route::post('/userSetup/ListFilter/company/settings',[CompanySettingController::class,'userListFilter']);
+
+
+    // Basic Information
+    Route::post('/basicInformation/setup',[CompanySettingController::class,'storeBasicInformation']);
+
+
+
+
+
+
+
 
 
     // Director Setup

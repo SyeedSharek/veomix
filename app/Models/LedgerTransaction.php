@@ -23,4 +23,9 @@ class LedgerTransaction extends Model
     public function creditAccount(){
         return $this->hasMany(CreditAccount::class,'ledger_transaction_id');
     }
+
+    
+
+
+
 }

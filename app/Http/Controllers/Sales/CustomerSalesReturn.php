@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Sales;
 use App\Http\Controllers\Controller;
 use App\Models\CashDetail;
 use App\Models\CashSale;
+use App\Models\DebitAccount;
 use App\Models\CustomerProductReturn;
 use App\Models\CustomerSalesReturn as ModelsCustomerSalesReturn;
 use App\Models\HireProductDetails;
@@ -59,6 +60,13 @@ class CustomerSalesReturn extends Controller
             $data['return_date'] = Carbon::createFromFormat('d/m/Y', $request->return_date)->format('Y-m-d');
 
             $authUser = Auth::user()->name;
+
+            $debitAccount = DebitAccount::create([
+                'member_id' => $request->member_id,
+                'return_amount' => $request->return_amount,
+                'ledger_transaction_id' => 3
+
+            ]);
 
 
 

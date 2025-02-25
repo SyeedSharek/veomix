@@ -8,6 +8,7 @@ use App\Models\BillingDetail;
 use App\Models\CashDetail;
 use App\Models\CashPayment;
 use App\Models\CashSale;
+use App\Models\CreditAccount;
 use App\Models\HireLoanManagement;
 use App\Models\HireProductDetails;
 use App\Models\HireProductPayment;
@@ -80,6 +81,13 @@ class CashSalesController extends Controller
                     'invoice_number' => $invoice_number,
                     'sale_type_id' => $request->sale_type_id,
 
+
+                ]);
+
+                $creditAccount = CreditAccount::create([
+                    'member_id' => $request->member_id,
+                    'cash_sales_amount' => $request->member_paid_amount,
+                    'transaction_report_id' => 4,
 
                 ]);
 
@@ -227,6 +235,14 @@ class CashSalesController extends Controller
                 ]);
 
 
+                $creditAccount = CreditAccount::create([
+                    'whole_saler_id' => $request->whole_salier_member_id,
+                    'whole_sales_amount' => $request->whole_sailer_paid_ammount,
+                    'transaction_report_id' => 4
+
+                ]);
+
+
                 // Step 2: Insert Cash Details (Loop through products)
                 foreach ($request->products as $product) {
 
@@ -287,6 +303,8 @@ class CashSalesController extends Controller
                     'total_amount' => $request->total_amount,
                     'after_invoice_discount_total' => $request->total_amount - $request->invoice_discount,
                 ]);
+
+
 
 
 
@@ -390,6 +408,8 @@ class CashSalesController extends Controller
                 ]);
 
 
+
+
                 // Step 2: Insert Cash Details (Loop through products)
                 foreach ($request->products as $product) {
 
@@ -450,9 +470,16 @@ class CashSalesController extends Controller
                     'after_invoice_discount_total' => $request->total_amount - $request->invoice_discount,
                 ]);
 
+                $creditAccount = CreditAccount::create([
+                    'member_id' => $request->member_id,
+                    'hire_sales_amount' => $request->total_amount - $request->invoice_discount,
+                    'transaction_report_id' => 4
+                ]);
 
 
-                HireLoanManagement::create([
+
+
+                $hireLoanManage = HireLoanManagement::create([
                     'installment_type_id' => $request->installment_type_id,
                     'installment_number' => $request->installment_number,
                     'paid_installment' => $request->paid_installment,
@@ -466,12 +493,14 @@ class CashSalesController extends Controller
                 ]);
 
 
+
                 InstallmentManage::create([
                     'member_id' => $request->member_id,
                     'invoice_number' => $invoice_number,
                     'total_amount' =>  $request->total_amount,
                     'paid_installment_loan' => $request->paid_installment,
-                    'total_due_amount' => $request->total_due_amount,
+                    // 'total_due_amount' => $request->total_due_amount,
+                    'hire_loan_manage_id' => $hireLoanManage->id,
                     'due_amount' => $request->total_due_amount,
                     'total_installment' => $request->installment_number,
                     'due_installment' => $request->installment_number,

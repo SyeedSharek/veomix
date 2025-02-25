@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Models\Billing;
 use App\Models\BillingDetail;
+use App\Models\CreditAccount;
 use App\Models\ProductStockManagement;
 use App\Models\ReturnProduct;
 use Carbon\Carbon;
@@ -95,6 +96,15 @@ class ReturnProductController extends Controller
 
 
 
+            $credit = CreditAccount::create([
+                'return_amount' => $request->return_amount,
+                'supplier_id' => $request->supplierId,
+                'transaction_report_id' => 5,
+
+            ]);
+
+
+
 
             $existingReturn = ReturnProduct::where('supplier_id', $request->supplierId)
                 ->where('product_id', $request->product_id)
@@ -124,6 +134,7 @@ class ReturnProductController extends Controller
                     'billing_id' => $request->billing_id,
                 ]);
             }
+
 
 
             DB::commit();

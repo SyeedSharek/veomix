@@ -182,14 +182,15 @@ class PurchaseEntryController extends Controller
 
 
                 // insert in Debit Account
-                $total_debit_account = DebitAccount::latest()->value('total_debit_amount') ?? 0;
-                $total_debit_account += ($request->total_amount ?? 0);
+                // $total_debit_account = DebitAccount::latest()->value('total_debit_amount') ?? 0;
+                // $total_debit_account += ($request->total_amount ?? 0);
 
                 DebitAccount::create([
                     'supplier_id' => $request->supplier_id,
                     'total_product_purchase_amount' => $request->total_amount,
                     'due_product_amount' => $due_amount,
-                    'total_debit_amount' => $total_debit_account
+                    'transaction_report_id' => 3
+                    // 'total_debit_amount' => $total_debit_account
 
                 ]);
 
