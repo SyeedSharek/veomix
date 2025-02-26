@@ -8,6 +8,7 @@ use App\Models\BillingDetail;
 use App\Models\CashDetail;
 use App\Models\CashPayment;
 use App\Models\CashSale;
+use App\Models\Product;
 use App\Models\CreditAccount;
 use App\Models\HireLoanManagement;
 use App\Models\HireProductDetails;
@@ -27,14 +28,191 @@ use Illuminate\Support\Str;
 
 class CashSalesController extends Controller
 {
+    // public function cashSalesEntry(Request $request)
+    // {
+    //     if (Auth::check()) {
+
+    //         $authName = auth()->user()->name;
+
+
+    //         // dd($request->all());
+    //         $request->validate([
+    //             'member_id' => 'required|integer',
+    //             'products' => 'required|array',
+    //             'products.*.product_id' => 'required|integer|exists:products,id',
+    //             'products.*.quantity' => 'required|integer|min:1',
+    //             'products.*.price' => 'required|numeric|min:0',
+    //             'products.*.discount_percentage' => 'required|numeric|min:0',
+    //             'total_amount' => 'required|numeric|min:0',
+    //             'total_quantity' => 'required|numeric',
+
+    //             'member_paid_amount' => 'required|numeric|min:0',
+    //             'payment_type_id' => 'required|integer',
+    //             'invoice_discount' => 'string',
+    //             'invoice_date' => 'required|date_format:d/m/Y',
+    //             'invoice_warranty' => 'required|date_format:d/m/Y',
+    //             'billing_id' => 'integer|exists:billings,id',
+    //             'supplierId' => 'integer|exists:suppliers,id',
+    //             'sale_type_id' => 'required|integer',
+    //         ]);
+
+    //         $request->merge([
+    //             'invoice_warranty' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_warranty)->format('Y-m-d'),
+    //             'invoice_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
+
+    //         ]);
+
+    //         $tax_data = TaxAmount::first();
+    //         $tax_amount =  $tax_data->tax_percentage;
+
+    //         $invoice_number = mt_rand(1000, 9999);
+
+
+    //         DB::beginTransaction();
+    //         try {
+    //             // Step 1: Create cash Entry
+    //             $cashSales = CashSale::create([
+    //                 'member_id' => $request->member_id,
+    //                 'invoice_date' => $request->invoice_date,
+    //                 'invoice_warranty' => $request->invoice_warranty,
+    //                 'tax_percent' => $tax_amount,
+    //                 'total_amount' => $request->total_amount,
+    //                 'total_quantity' => $request->total_quantity,
+    //                 'entry_name' => $authName,
+    //                 'invoice_number' => $invoice_number,
+    //                 'sale_type_id' => $request->sale_type_id,
+
+
+    //             ]);
+
+
+
+
+
+    //             // Step 2: Insert Cash Details (Loop through products)
+    //             foreach ($request->products as $product) {
+
+    //                 $product_id = $product['product_id'];
+    //                 $product_quantity = $product['quantity'];
+    //                 // $sell_product_price = $product['price'];
+
+    //                 // $product = Product::where('id', $product_id)->get();
+    //                 // $product = Product::where('id', $product_id)->first();
+    //                 // // dd($product);
+
+
+
+    //                 //     $product_profit =  $sell_product_price - $product->purchase_price;
+    //                 //     $total_product_profit =  $product_profit * $product_quantity;
+
+
+
+
+
+    //                     CashDetail::create([
+    //                         'cash_id' => $cashSales->id,
+    //                         'product_id' => $product['product_id'],
+    //                         'product_quantity' => $product['quantity'],
+    //                         'product_price' => $product['price'],
+    //                         'product_discount_percentage' => $product['discount_percentage'],
+    //                         'subtotal' => $product['quantity'] * $product['price'],
+    //                         // 'per_product_profit' => $product_profit,
+    //                         // 'total_product_profiit' => $total_product_profit,
+
+
+    //                     ]);
+
+
+
+
+    //                 $billing = Billing::where('supplier_id', $request->supplierId)->first();
+
+
+
+    //                 if (!$billing) {
+    //                     return response()->json(['message' => 'Billing record not found for this supplier'], 404);
+    //                 }
+
+
+    //                 $billingDetail = BillingDetail::where('billing_id', $billing->id)
+    //                     ->where('product_id', $product['product_id'])
+    //                     ->first();
+
+    //                 if ($billingDetail) {
+    //                     $new_quantity = max(0, $billingDetail->quantity - $product['quantity']); // Prevent negative stock
+    //                     $billingDetail->update(['avilable_stock_quantity' => $new_quantity]);
+    //                 }
+
+    //                 $creditAccount = CreditAccount::create([
+    //                     'member_id' => $request->member_id,
+    //                     'cash_sales_amount' => $request->member_paid_amount,
+    //                     'transaction_report_id' => 4,
+
+    //                 ]);
+
+
+
+    //                 $productStock = ProductStockManagement::where('product_id', $product_id)->first();
+
+    //                 if ($productStock) {
+    //                     // Decrement quantity if the product exists
+    //                     $productStock->decrement('total_product_quantity', $product_quantity);
+    //                 } else {
+    //                     return response()->json(['message' => 'Stock record not found for this product'], 404);
+    //                 }
+    //             }
+
+
+
+
+
+
+    //             // Step 3: Insert Payment Details
+
+
+    //             CashPayment::create([
+    //                 'cash_id' => $cashSales->id,
+    //                 'member_paid_amount' => $request->member_paid_amount,
+    //                 'payment_type_id' => $request->payment_type_id,
+    //                 'invoice_discount' => $request->invoice_discount,
+    //                 'total_amount' => $request->total_amount,
+    //                 'after_invoice_discount_total' => $request->total_amount - $request->invoice_discount,
+    //             ]);
+
+
+
+
+    //             DB::commit();
+
+    //             return response()->json([
+    //                 'message' => 'Bill created successfully',
+    //                 'cashSales_id' => $cashSales->id
+    //             ], 201);
+    //         } catch (\Exception $e) {
+    //             DB::rollBack();
+    //             return response()->json([
+    //                 'message' => 'Error creating bill',
+    //                 'error' => $e->getMessage()
+    //             ], 500);
+    //         }
+    //     } else {
+    //         return response()->json([
+    //             'message' => 'Unauthorized'
+    //         ], 400);
+    //     }
+    // }
+
+
+
+
+
     public function cashSalesEntry(Request $request)
     {
         if (Auth::check()) {
 
             $authName = auth()->user()->name;
 
-
-            // dd($request->all());
+            // Validate the incoming request
             $request->validate([
                 'member_id' => 'required|integer',
                 'products' => 'required|array',
@@ -44,7 +222,6 @@ class CashSalesController extends Controller
                 'products.*.discount_percentage' => 'required|numeric|min:0',
                 'total_amount' => 'required|numeric|min:0',
                 'total_quantity' => 'required|numeric',
-
                 'member_paid_amount' => 'required|numeric|min:0',
                 'payment_type_id' => 'required|integer',
                 'invoice_discount' => 'string',
@@ -55,21 +232,20 @@ class CashSalesController extends Controller
                 'sale_type_id' => 'required|integer',
             ]);
 
+            // Format the dates to Y-m-d
             $request->merge([
                 'invoice_warranty' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_warranty)->format('Y-m-d'),
                 'invoice_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
-
             ]);
 
             $tax_data = TaxAmount::first();
-            $tax_amount =  $tax_data->tax_percentage;
+            $tax_amount = $tax_data->tax_percentage;
 
             $invoice_number = mt_rand(1000, 9999);
 
-
             DB::beginTransaction();
             try {
-                // Step 1: Create cash Entry
+                // Step 1: Create Cash Entry
                 $cashSales = CashSale::create([
                     'member_id' => $request->member_id,
                     'invoice_date' => $request->invoice_date,
@@ -80,71 +256,82 @@ class CashSalesController extends Controller
                     'entry_name' => $authName,
                     'invoice_number' => $invoice_number,
                     'sale_type_id' => $request->sale_type_id,
-
-
                 ]);
 
-                $creditAccount = CreditAccount::create([
-                    'member_id' => $request->member_id,
-                    'cash_sales_amount' => $request->member_paid_amount,
-                    'transaction_report_id' => 4,
+                // Step 2: Fetch all products at once
+                $productIds = collect($request->products)->pluck('product_id');
+                $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
-                ]);
+                // Initialize total profit variable
+                $totalProfit = 0;
 
-
-                // Step 2: Insert Cash Details (Loop through products)
+                // Step 3: Loop through products and create CashDetails
                 foreach ($request->products as $product) {
+                    $productId = $product['product_id'];
+                    $productQuantity = $product['quantity'];
+                    $productPrice = $product['price'];
 
-                    $product_id = $product['product_id'];
-                    $product_quantity = $product['quantity'];
+                    // Check if the product exists in the database
+                    if (!isset($products[$productId])) {
+                        return response()->json(['message' => "Product with ID {$productId} not found"], 404);
+                    }
 
+                    $productModel = $products[$productId];
+                    $productProfit = $productPrice - $productModel->purchase_price;
+                    $totalProductProfit = $productProfit * $productQuantity;
+
+                    // Accumulate total profit
+                    $totalProfit += $totalProductProfit;
+
+                    // Insert CashDetail record
                     CashDetail::create([
                         'cash_id' => $cashSales->id,
-                        'product_id' => $product['product_id'],
-                        'product_quantity' => $product['quantity'],
-                        'product_price' => $product['price'],
+                        'product_id' => $productModel->id,
+                        'product_quantity' => $productQuantity,
+                        'product_price' => $productPrice,
                         'product_discount_percentage' => $product['discount_percentage'],
-                        'subtotal' => $product['quantity'] * $product['price'],
-
+                        'subtotal' => $productQuantity * $productPrice,
+                        'per_product_profit' => $productProfit,
+                        'total_product_profiit' => $totalProductProfit,
                     ]);
 
+                    // Step 4: Update billing information
                     $billing = Billing::where('supplier_id', $request->supplierId)->first();
-
-
-
                     if (!$billing) {
                         return response()->json(['message' => 'Billing record not found for this supplier'], 404);
                     }
-
 
                     $billingDetail = BillingDetail::where('billing_id', $billing->id)
                         ->where('product_id', $product['product_id'])
                         ->first();
 
                     if ($billingDetail) {
-                        $new_quantity = max(0, $billingDetail->quantity - $product['quantity']); // Prevent negative stock
-                        $billingDetail->update(['avilable_stock_quantity' => $new_quantity]);
+                        $newQuantity = max(0, $billingDetail->quantity - $product['quantity']); // Prevent negative stock
+                        $billingDetail->update(['avilable_stock_quantity' => $newQuantity]);
                     }
 
+                    // Step 5: Insert Credit Account record
+                    // Here, the accumulated profit for all products is inserted
 
-                    $productStock = ProductStockManagement::where('product_id', $product_id)->first();
 
+                    // Step 6: Update Product Stock Management
+                    $productStock = ProductStockManagement::where('product_id', $productId)->first();
                     if ($productStock) {
                         // Decrement quantity if the product exists
-                        $productStock->decrement('total_product_quantity', $product_quantity);
+                        $productStock->decrement('total_product_quantity', $productQuantity);
                     } else {
                         return response()->json(['message' => 'Stock record not found for this product'], 404);
                     }
                 }
 
+                CreditAccount::create([
+                    'member_id' => $request->member_id,
+                    'cash_sales_amount' => $request->member_paid_amount,
+                    'transaction_report_id' => 4,
+                    'cash_total_profit' => $totalProfit,
+                ]);
 
-
-
-
-
-                // Step 3: Insert Payment Details
-
-
+                // Step 7: Insert Cash Payment record
                 CashPayment::create([
                     'cash_id' => $cashSales->id,
                     'member_paid_amount' => $request->member_paid_amount,
@@ -154,9 +341,7 @@ class CashSalesController extends Controller
                     'after_invoice_discount_total' => $request->total_amount - $request->invoice_discount,
                 ]);
 
-
-
-
+                // Commit the transaction
                 DB::commit();
 
                 return response()->json([
@@ -176,6 +361,10 @@ class CashSalesController extends Controller
             ], 400);
         }
     }
+
+
+
+
 
 
 
@@ -212,6 +401,10 @@ class CashSalesController extends Controller
 
             ]);
 
+
+            $productIds = collect($request->products)->pluck('product_id');
+            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
             $tax_data = TaxAmount::first();
             $tax_amount =  $tax_data->tax_percentage;
             $invoice_number = mt_rand(1000, 9999);
@@ -235,19 +428,29 @@ class CashSalesController extends Controller
                 ]);
 
 
-                $creditAccount = CreditAccount::create([
-                    'whole_saler_id' => $request->whole_salier_member_id,
-                    'whole_sales_amount' => $request->whole_sailer_paid_ammount,
-                    'transaction_report_id' => 4
 
-                ]);
 
+                $totalProfit = 0;
 
                 // Step 2: Insert Cash Details (Loop through products)
                 foreach ($request->products as $product) {
 
                     $product_id = $product['product_id'];
                     $product_quantity = $product['quantity'];
+                    $productPrice = $product['price'];
+
+                    // Check if the product exists in the database
+                    if (!isset($products[$product_id])) {
+                        return response()->json(['message' => "Product with ID {$product_id} not found"], 404);
+                    }
+
+                    $productModel = $products[$product_id];
+                    $productProfit = $productPrice - $productModel->purchase_price;
+                    $totalProductProfit = $productProfit * $product_quantity;
+
+                    // Accumulate total profit
+                    $totalProfit += $totalProductProfit;
+
                     WholeProductSalesDetail::create([
                         'whole_product_sales_id' => $wholeProdcutSales->id,
                         'product_id' => $product['product_id'],
@@ -255,6 +458,8 @@ class CashSalesController extends Controller
                         'product_price' => $product['price'],
                         'product_discount_percentage' => $product['discount_percentage'],
                         'subtotal' => $product['quantity'] * $product['price'],
+                        'per_product_profit' =>   $productProfit,
+                        'total_product_profit' =>     $totalProductProfit,
 
                     ]);
 
@@ -287,6 +492,15 @@ class CashSalesController extends Controller
                         return response()->json(['message' => 'Stock record not found for this product'], 404);
                     }
                 }
+
+
+                $creditAccount = CreditAccount::create([
+                    'whole_saler_id' => $request->whole_salier_member_id,
+                    'whole_sales_amount' => $request->whole_sailer_paid_ammount,
+                    'transaction_report_id' => 4,
+                    'whole_sales_total_profit' => $totalProfit
+
+                ]);
 
 
 
@@ -331,208 +545,426 @@ class CashSalesController extends Controller
         }
     }
 
+
+
+
+    // public function hireSalesEntry(Request $request)
+    // {
+    //     if (Auth::check()) {
+
+    //         $authName = auth()->user()->name;
+
+
+    //         // dd($request->all());
+    //         $request->validate([
+    //             'member_id' => 'required|integer',
+    //             'products' => 'required|array',
+    //             'products.*.product_id' => 'required|integer|exists:products,id',
+    //             'products.*.quantity' => 'required|integer|min:1',
+    //             'products.*.price' => 'required|string|min:0',
+    //             'products.*.discount_percentage' => 'required|string|min:0',
+    //             'total_amount' => 'required|string|min:0',
+    //             'total_quantity' => 'required|string',
+
+
+    //             'payment_type_id' => 'required|integer',
+    //             'invoice_discount' => 'string',
+    //             'invoice_date' => 'required|date_format:d/m/Y',
+    //             'invoice_warranty' => 'required|date_format:d/m/Y',
+    //             'billing_id' => 'integer|exists:billings,id',
+    //             'supplierId' => 'required|integer|exists:suppliers,id',
+
+    //             // installment Data
+    //             'installment_type_id' => 'required|integer|exists:installment_types,id',
+    //             'installment_number' => 'required|string',
+    //             'paid_installment' => 'required|string',
+    //             'installment_date' => 'required|date_format:d/m/Y',
+    //             'installment_expired_date' => 'required|date_format:d/m/Y',
+    //             'emi_amount' => 'required|string',
+    //             "total_due_amount" => 'required|string',
+    //             'sale_type_id' => 'required|integer',
+
+
+
+
+
+
+    //         ]);
+
+    //         $request->merge([
+    //             'invoice_warranty' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_warranty)->format('Y-m-d'),
+    //             'invoice_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
+
+    //             'installment_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->installment_date)->format('Y-m-d'),
+    //             'installment_expired_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->installment_expired_date)->format('Y-m-d'),
+
+    //         ]);
+
+    //         $tax_data = TaxAmount::first();
+    //         $tax_amount =  $tax_data->tax_percentage;
+
+    //         $invoice_number = mt_rand(1000, 9999);
+
+    //         $productIds = collect($request->products)->pluck('product_id');
+    //         $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+
+
+    //         DB::beginTransaction();
+    //         try {
+    //             // Step 1: Create cash Entry
+    //             $hireProductSale = HireProductSale::create([
+    //                 'member_id' => $request->member_id,
+    //                 'invoice_number' => $invoice_number,
+    //                 'invoice_date' => $request->invoice_date,
+    //                 'invoice_warranty' => $request->invoice_warranty,
+    //                 'tax_amount' => $tax_amount,
+    //                 'total_amount' => $request->total_amount,
+    //                 'total_quantity' => $request->total_quantity,
+    //                 'entry_name' => $authName,
+    //                 'sale_type_id' => $request->sale_type_id,
+
+
+    //             ]);
+
+
+    //             $totalProfit = 0;
+
+
+
+
+    //             // Step 2: Insert Cash Details (Loop through products)
+    //             foreach ($request->products as $product) {
+
+    //                 $product_id = $product['product_id'];
+    //                 $product_quantity = $product['quantity'];
+    //                 $productPrice = $product['price'];
+
+    //                 // Check if the product exists in the database
+    //                 if (!isset($products[$product_id])) {
+    //                     return response()->json(['message' => "Product with ID {$product_id} not found"], 404);
+    //                 }
+
+    //                 $productModel = $products[$product_id];
+    //                 $productProfit = $productPrice - $productModel->purchase_price;
+    //                 $totalProductProfit = $productProfit * $product_quantity;
+
+    //                 // Accumulate total profit
+    //                 $totalProfit += $totalProductProfit;
+
+    //                 HireProductDetails::create([
+    //                     'hire_product_sales_id' => $hireProductSale->id,
+    //                     'product_id' => $product['product_id'],
+    //                     'product_quantity' => $product['quantity'],
+    //                     'product_price' => $product['price'],
+    //                     'product_discount_percentage' => $product['discount_percentage'],
+    //                     'subtotal' => $product['quantity'] * $product['price'],
+    //                     'per_product_profit' => $productProfit ,
+    //                     'total_product_profit' => $totalProductProfit
+
+    //                 ]);
+
+    //                 $billing = Billing::where('supplier_id', $request->supplierId)->first();
+
+
+
+    //                 if (!$billing) {
+    //                     return response()->json(['message' => 'Billing record not found for this supplier'], 404);
+    //                 }
+
+
+    //                 $billingDetail = BillingDetail::where('billing_id', $billing->id)
+    //                     ->where('product_id', $product['product_id'])
+    //                     ->first();
+
+    //                 if ($billingDetail) {
+    //                     $new_quantity = max(0, $billingDetail->quantity - $product['quantity']); // Prevent negative stock
+    //                     $billingDetail->update(['avilable_stock_quantity' => $new_quantity]);
+    //                 }
+
+
+    //                 $productStock = ProductStockManagement::where('product_id', $product_id)->first();
+
+    //                 if ($productStock) {
+    //                     // Decrement quantity if the product exists
+    //                     $productStock->decrement('total_product_quantity', $product_quantity);
+    //                 } else {
+    //                     return response()->json(['message' => 'Stock record not found for this product'], 404);
+    //                 }
+    //             }
+
+
+    //             $creditAccount = CreditAccount::create([
+    //                 'member_id' => $request->member_id,
+    //                 'hire_sales_amount' => $request->total_amount - $request->invoice_discount,
+    //                 'transaction_report_id' => 4,
+    //                 'hire_sales_total_profit' => $totalProfit
+    //             ]);
+
+
+
+
+    //             // Step 3: Insert Payment Details
+
+
+    //             HireProductPayment::create([
+    //                 'hire_product_sales_id' => $hireProductSale->id,
+    //                 'payment_type_id' => $request->payment_type_id,
+    //                 'invoice_discount' => $request->invoice_discount,
+    //                 'total_amount' => $request->total_amount,
+    //                 'after_invoice_discount_total' => $request->total_amount - $request->invoice_discount,
+    //             ]);
+
+    //             $creditAccount = CreditAccount::create([
+    //                 'member_id' => $request->member_id,
+    //                 'hire_sales_amount' => $request->total_amount - $request->invoice_discount,
+    //                 'transaction_report_id' => 4
+    //             ]);
+
+
+
+
+    //             $hireLoanManage = HireLoanManagement::create([
+    //                 'installment_type_id' => $request->installment_type_id,
+    //                 'installment_number' => $request->installment_number,
+    //                 'paid_installment' => $request->paid_installment,
+    //                 'installment_date' => $request->installment_date,
+    //                 'installment_expired_date' => $request->installment_expired_date,
+    //                 'emi_amount' => $request->emi_amount,
+    //                 'member_id' => $request->member_id,
+    //                 'invoice_number' => $invoice_number,
+    //                 'total_due_amount' => $request->total_due_amount,
+
+    //             ]);
+
+
+
+    //             InstallmentManage::create([
+    //                 'member_id' => $request->member_id,
+    //                 'invoice_number' => $invoice_number,
+    //                 'total_amount' =>  $request->total_amount,
+    //                 'paid_installment_loan' => $request->paid_installment,
+    //                 // 'total_due_amount' => $request->total_due_amount,
+    //                 'hire_loan_manage_id' => $hireLoanManage->id,
+    //                 'due_amount' => $request->total_due_amount,
+    //                 'total_installment' => $request->installment_number,
+    //                 'due_installment' => $request->installment_number,
+    //                 'installment_date' => $request->installment_date,
+    //                 'installment_expired_date' =>  $request->installment_expired_date,
+
+    //             ]);
+
+
+
+
+
+
+
+
+    //             DB::commit();
+
+    //             return response()->json([
+    //                 'message' => 'Bill created successfully',
+    //                 'hire_sale_id' => $hireProductSale->id
+    //             ], 201);
+    //         } catch (\Exception $e) {
+    //             DB::rollBack();
+    //             return response()->json([
+    //                 'message' => 'Error creating bill',
+    //                 'error' => $e->getMessage()
+    //             ], 500);
+    //         }
+    //     } else {
+    //         return response()->json([
+    //             'message' => 'Unauthorized'
+    //         ], 400);
+    //     }
+    // }
+
     public function hireSalesEntry(Request $request)
     {
-        if (Auth::check()) {
-
-            $authName = auth()->user()->name;
-
-
-            // dd($request->all());
-            $request->validate([
-                'member_id' => 'required|integer',
-                'products' => 'required|array',
-                'products.*.product_id' => 'required|integer|exists:products,id',
-                'products.*.quantity' => 'required|integer|min:1',
-                'products.*.price' => 'required|string|min:0',
-                'products.*.discount_percentage' => 'required|string|min:0',
-                'total_amount' => 'required|string|min:0',
-                'total_quantity' => 'required|string',
-
-
-                'payment_type_id' => 'required|integer',
-                'invoice_discount' => 'string',
-                'invoice_date' => 'required|date_format:d/m/Y',
-                'invoice_warranty' => 'required|date_format:d/m/Y',
-                'billing_id' => 'integer|exists:billings,id',
-                'supplierId' => 'required|integer|exists:suppliers,id',
-
-                // installment Data
-                'installment_type_id' => 'required|integer|exists:installment_types,id',
-                'installment_number' => 'required|string',
-                'paid_installment' => 'required|string',
-                'installment_date' => 'required|date_format:d/m/Y',
-                'installment_expired_date' => 'required|date_format:d/m/Y',
-                'emi_amount' => 'required|string',
-                "total_due_amount" => 'required|string',
-                'sale_type_id' => 'required|integer',
-
-
-
-
-
-
-            ]);
-
-            $request->merge([
-                'invoice_warranty' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_warranty)->format('Y-m-d'),
-                'invoice_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
-
-                'installment_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->installment_date)->format('Y-m-d'),
-                'installment_expired_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->installment_expired_date)->format('Y-m-d'),
-
-            ]);
-
-            $tax_data = TaxAmount::first();
-            $tax_amount =  $tax_data->tax_percentage;
-
-            $invoice_number = mt_rand(1000, 9999);
-
-
-
-            DB::beginTransaction();
-            try {
-                // Step 1: Create cash Entry
-                $hireProductSale = HireProductSale::create([
-                    'member_id' => $request->member_id,
-                    'invoice_number' => $invoice_number,
-                    'invoice_date' => $request->invoice_date,
-                    'invoice_warranty' => $request->invoice_warranty,
-                    'tax_amount' => $tax_amount,
-                    'total_amount' => $request->total_amount,
-                    'total_quantity' => $request->total_quantity,
-                    'entry_name' => $authName,
-                    'sale_type_id' => $request->sale_type_id,
-
-
-                ]);
-
-
-
-
-                // Step 2: Insert Cash Details (Loop through products)
-                foreach ($request->products as $product) {
-
-                    $product_id = $product['product_id'];
-                    $product_quantity = $product['quantity'];
-
-                    HireProductDetails::create([
-                        'hire_product_sales_id' => $hireProductSale->id,
-                        'product_id' => $product['product_id'],
-                        'product_quantity' => $product['quantity'],
-                        'product_price' => $product['price'],
-                        'product_discount_percentage' => $product['discount_percentage'],
-                        'subtotal' => $product['quantity'] * $product['price'],
-
-                    ]);
-
-                    $billing = Billing::where('supplier_id', $request->supplierId)->first();
-
-
-
-                    if (!$billing) {
-                        return response()->json(['message' => 'Billing record not found for this supplier'], 404);
-                    }
-
-
-                    $billingDetail = BillingDetail::where('billing_id', $billing->id)
-                        ->where('product_id', $product['product_id'])
-                        ->first();
-
-                    if ($billingDetail) {
-                        $new_quantity = max(0, $billingDetail->quantity - $product['quantity']); // Prevent negative stock
-                        $billingDetail->update(['avilable_stock_quantity' => $new_quantity]);
-                    }
-
-
-                    $productStock = ProductStockManagement::where('product_id', $product_id)->first();
-
-                    if ($productStock) {
-                        // Decrement quantity if the product exists
-                        $productStock->decrement('total_product_quantity', $product_quantity);
-                    } else {
-                        return response()->json(['message' => 'Stock record not found for this product'], 404);
-                    }
-                }
-
-
-
-
-
-                // Step 3: Insert Payment Details
-
-
-                HireProductPayment::create([
-                    'hire_product_sales_id' => $hireProductSale->id,
-                    'payment_type_id' => $request->payment_type_id,
-                    'invoice_discount' => $request->invoice_discount,
-                    'total_amount' => $request->total_amount,
-                    'after_invoice_discount_total' => $request->total_amount - $request->invoice_discount,
-                ]);
-
-                $creditAccount = CreditAccount::create([
-                    'member_id' => $request->member_id,
-                    'hire_sales_amount' => $request->total_amount - $request->invoice_discount,
-                    'transaction_report_id' => 4
-                ]);
-
-
-
-
-                $hireLoanManage = HireLoanManagement::create([
-                    'installment_type_id' => $request->installment_type_id,
-                    'installment_number' => $request->installment_number,
-                    'paid_installment' => $request->paid_installment,
-                    'installment_date' => $request->installment_date,
-                    'installment_expired_date' => $request->installment_expired_date,
-                    'emi_amount' => $request->emi_amount,
-                    'member_id' => $request->member_id,
-                    'invoice_number' => $invoice_number,
-                    'total_due_amount' => $request->total_due_amount,
-
-                ]);
-
-
-
-                InstallmentManage::create([
-                    'member_id' => $request->member_id,
-                    'invoice_number' => $invoice_number,
-                    'total_amount' =>  $request->total_amount,
-                    'paid_installment_loan' => $request->paid_installment,
-                    // 'total_due_amount' => $request->total_due_amount,
-                    'hire_loan_manage_id' => $hireLoanManage->id,
-                    'due_amount' => $request->total_due_amount,
-                    'total_installment' => $request->installment_number,
-                    'due_installment' => $request->installment_number,
-                    'installment_date' => $request->installment_date,
-                    'installment_expired_date' =>  $request->installment_expired_date,
-
-                ]);
-
-
-
-
-
-
-
-
-                DB::commit();
-
-                return response()->json([
-                    'message' => 'Bill created successfully',
-                    'hire_sale_id' => $hireProductSale->id
-                ], 201);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json([
-                    'message' => 'Error creating bill',
-                    'error' => $e->getMessage()
-                ], 500);
-            }
-        } else {
+        if (!Auth::check()) {
             return response()->json([
                 'message' => 'Unauthorized'
             ], 400);
+        }
+
+        $authName = auth()->user()->name;
+
+        // Validate request
+        $request->validate([
+            'member_id' => 'required|integer',
+            'products' => 'required|array',
+            'products.*.product_id' => 'required|integer|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|string|min:0',
+            'products.*.discount_percentage' => 'required|string|min:0',
+            'total_amount' => 'required|string|min:0',
+            'total_quantity' => 'required|string',
+            'payment_type_id' => 'required|integer',
+            'invoice_discount' => 'string',
+            'invoice_date' => 'required|date_format:d/m/Y',
+            'invoice_warranty' => 'required|date_format:d/m/Y',
+            'billing_id' => 'integer|exists:billings,id',
+            'supplierId' => 'required|integer|exists:suppliers,id',
+            'installment_type_id' => 'required|integer|exists:installment_types,id',
+            'installment_number' => 'required|string',
+            'paid_installment' => 'required|string',
+            'installment_date' => 'required|date_format:d/m/Y',
+            'installment_expired_date' => 'required|date_format:d/m/Y',
+            'emi_amount' => 'required|string',
+            'total_due_amount' => 'required|string',
+            'sale_type_id' => 'required|integer',
+        ]);
+
+        // Convert date format
+        $request->merge([
+            'invoice_warranty' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_warranty)->format('Y-m-d'),
+            'invoice_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->invoice_date)->format('Y-m-d'),
+            'installment_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->installment_date)->format('Y-m-d'),
+            'installment_expired_date' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->installment_expired_date)->format('Y-m-d'),
+        ]);
+
+        $tax_data = TaxAmount::first();
+        $tax_amount = $tax_data->tax_percentage ?? 0;
+        $invoice_number = mt_rand(1000, 9999);
+
+
+
+        DB::beginTransaction();
+        try {
+            // Step 1: Create hire product sale entry
+            $hireProductSale = HireProductSale::create([
+                'member_id' => $request->member_id,
+                'invoice_number' => $invoice_number,
+                'invoice_date' => $request->invoice_date,
+                'invoice_warranty' => $request->invoice_warranty,
+                'tax_amount' => $tax_amount,
+                'total_amount' => $request->total_amount,
+                'total_quantity' => $request->total_quantity,
+                'entry_name' => $authName,
+                'sale_type_id' => $request->sale_type_id,
+            ]);
+
+
+            // Fetch products in advance
+            $productIds = collect($request->products)->pluck('product_id');
+            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+            // Initialize total profit variable
+            $totalProfit = 0;
+
+
+            // Step 2: Insert hire product details
+            foreach ($request->products as $product) {
+                $product_id = $product['product_id'];
+                $product_quantity = $product['quantity'];
+                $productId = $product['product_id'];
+                $productQuantity = $product['quantity'];
+                $productPrice = $product['price'];
+
+                // Check if the product exists in the database
+                if (!isset($products[$productId])) {
+                    return response()->json(['message' => "Product with ID {$productId} not found"], 404);
+                }
+
+                $productModel = $products[$productId];
+                $productProfit = $productPrice - $productModel->purchase_price;
+                $totalProductProfit = $productProfit * $productQuantity;
+
+                // Accumulate total profit
+                $totalProfit += $totalProductProfit;
+
+                HireProductDetails::create([
+                    'hire_product_sales_id' => $hireProductSale->id,
+                    'product_id' => $product_id,
+                    'product_quantity' => $product_quantity,
+                    'product_price' => $productPrice,
+                    'product_discount_percentage' => $product['discount_percentage'],
+                    'subtotal' => $product_quantity * $productPrice,
+                    'per_product_profit' => $productProfit,
+                    'total_product_profit' => $totalProductProfit
+                ]);
+
+                // Update billing stock
+                $billing = Billing::where('supplier_id', $request->supplierId)->first();
+                if (!$billing) {
+                    return response()->json(['message' => 'Billing record not found for this supplier'], 404);
+                }
+
+                $billingDetail = BillingDetail::where('billing_id', $billing->id)
+                    ->where('product_id', $product_id)
+                    ->first();
+
+                if ($billingDetail) {
+                    $new_quantity = max(0, $billingDetail->quantity - $product_quantity);
+                    $billingDetail->update(['avilable_stock_quantity' => $new_quantity]);
+                }
+
+                // Update product stock
+                $productStock = ProductStockManagement::where('product_id', $product_id)->first();
+                if ($productStock) {
+                    $productStock->decrement('total_product_quantity', $product_quantity);
+                } else {
+                    return response()->json(['message' => 'Stock record not found for this product'], 404);
+                }
+            }
+
+            // Step 3: Insert credit account (fixed duplicate issue)
+            CreditAccount::create([
+                'member_id' => $request->member_id,
+                'hire_sales_amount' => $request->total_amount - $request->invoice_discount,
+                'transaction_report_id' => 4,
+                'hire_sales_total_profit' => $totalProfit
+            ]);
+
+            // Step 4: Insert Payment Details
+            HireProductPayment::create([
+                'hire_product_sales_id' => $hireProductSale->id,
+                'payment_type_id' => $request->payment_type_id,
+                'invoice_discount' => $request->invoice_discount,
+                'total_amount' => $request->total_amount,
+                'after_invoice_discount_total' => $request->total_amount - $request->invoice_discount,
+            ]);
+
+            // Step 5: Insert Installment Details
+            $hireLoanManage = HireLoanManagement::create([
+                'installment_type_id' => $request->installment_type_id,
+                'installment_number' => $request->installment_number,
+                'paid_installment' => $request->paid_installment,
+                'installment_date' => $request->installment_date,
+                'installment_expired_date' => $request->installment_expired_date,
+                'emi_amount' => $request->emi_amount,
+                'member_id' => $request->member_id,
+                'invoice_number' => $invoice_number,
+                'total_due_amount' => $request->total_due_amount,
+            ]);
+
+            InstallmentManage::create([
+                'member_id' => $request->member_id,
+                'invoice_number' => $invoice_number,
+                'total_amount' => $request->total_amount,
+                'paid_installment_loan' => $request->paid_installment,
+                'hire_loan_manage_id' => $hireLoanManage->id,
+                'due_amount' => $request->total_due_amount,
+                'total_installment' => $request->installment_number,
+                'due_installment' => $request->installment_number,
+                'installment_date' => $request->installment_date,
+                'installment_expired_date' => $request->installment_expired_date,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Bill created successfully',
+                'hire_sale_id' => $hireProductSale->id
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Error creating bill',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -1452,4 +1884,279 @@ class CashSalesController extends Controller
         ], 400);
     }
 
+
+
+
+    //     public function profitLossReport(Request $request)
+    // {
+    //     if (!Auth::check()) {
+    //         return response()->json(['message' => 'Unauthorized'], 401);
+    //     }
+
+    //     $product_id = $request->input('product_id');
+    //     $sales_type_id = $request->input('sales_type_id');
+    //     $member_id = $request->input('member_id');
+    //     $branch_group_id = $request->input('branch_group_id');
+
+    //     if ($sales_type_id == 1) {
+    //         $cashSalesQuery = CashDetail::with('product', 'cashSales.member.branchGroup');
+
+    //         if ($product_id) {
+    //             $cashSalesQuery->whereHas('product', function ($query) use ($product_id) {
+    //                 $query->where('id', $product_id);
+    //             });
+    //         }
+
+    //         // Get sum of total_product_profiit grouped by product_id
+    //         $productWiseProfit = CashDetail::selectRaw('product_id, SUM(COALESCE(total_product_profiit, 0)) as total_profit')
+    //             ->when($product_id, function ($query) use ($product_id) {
+    //                 return $query->where('product_id', $product_id);
+    //             })
+    //             ->groupBy('product_id')
+    //             ->get();
+
+    //         if ($member_id) {
+    //             $cashSalesQuery->whereHas('cashSales.member', function ($query) use ($member_id) {
+    //                 $query->where('id', $member_id);
+    //             });
+    //         }
+
+    //         // Calculate SUM(total_product_profiit) per member_id, handling NULL values
+    //         $memberWiseProfit = CashDetail::join('cash_sales', 'cash_details.cash_id', '=', 'cash_sales.id')
+    //             ->selectRaw('cash_sales.member_id, SUM(COALESCE(cash_details.total_product_profiit, 0)) as total_profit')
+    //             ->when($member_id, function ($query) use ($member_id) {
+    //                 return $query->where('cash_sales.member_id', $member_id);
+    //             })
+    //             ->groupBy('cash_sales.member_id')
+    //             ->get();
+
+
+
+    //             if ($branch_group_id) {
+    //                 $cashSalesQuery->whereHas('cashSales.member.branchGroup', function ($query) use ($branch_group_id) {
+    //                     $query->where('id', $branch_group_id);
+    //                 });
+    //             }
+
+    //             $branchWiseProfit = CashDetail::join('cash_sales', 'cash_details.cash_id', '=', 'cash_sales.id')
+    //             ->join('members', 'cash_sales.member_id', '=', 'members.id') // Ensure members exist
+    //             ->join('branch_groups', 'members.branch_group_id', '=', 'branch_groups.id') // Join with branch_groups
+    //             ->selectRaw('members.branch_group_id, SUM(COALESCE(cash_details.total_product_profiit, 0)) as total_profit')
+    //             ->when($branch_group_id, function ($query) use ($branch_group_id) {
+    //                 return $query->where('members.branch_group_id', $branch_group_id);
+    //             })
+    //             ->groupBy('members.branch_group_id')
+    //             ->get();
+
+
+
+
+
+
+    //         // Execute the query to get product details
+    //         $cashSales = $cashSalesQuery->get();
+
+    //         return response()->json([
+    //             'cash_sell_datails' => $cashSales,
+    //             'product_total_sell_income' => $productWiseProfit,
+    //             'member_wish_total_sell_income' => $memberWiseProfit,
+    //             'branch_wish_total_sell_income' => $branchWiseProfit
+    //         ]);
+    //     }
+
+    //     return response()->json(['message' => 'Invalid Sales Type'], 400);
+    // }
+
+
+    public function profitLossReport(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $product_id = $request->input('product_id');
+        $sales_type_id = $request->input('sales_type_id');
+        $member_id = $request->input('member_id');
+        $branch_group_id = $request->input('branch_group_id');
+        $branch_id = $request->input('branch_id');
+
+        $form_date = $request->input('form_date');
+        $upto_date = $request->input('upto_date');
+
+        if ($sales_type_id == 1) {
+            $cashSalesQuery = CashDetail::with('product', 'cashSales.member.branchGroup.employee.branchName');
+
+            if ($product_id) {
+                $cashSalesQuery->whereHas('product', function ($query) use ($product_id) {
+                    $query->where('id', $product_id);
+                });
+            }
+
+            // Get sum of total_product_profiit grouped by product_id
+            $productWiseProfit = CashDetail::selectRaw('product_id, SUM(COALESCE(total_product_profiit, 0)) as total_profit')
+                ->when($product_id, function ($query) use ($product_id) {
+                    return $query->where('product_id', $product_id);
+                })
+                ->groupBy('product_id')
+                ->get();
+
+            if ($member_id) {
+                $cashSalesQuery->whereHas('cashSales.member', function ($query) use ($member_id) {
+                    $query->where('id', $member_id);
+                });
+            }
+
+            // Calculate SUM(total_product_profiit) per member_id, handling NULL values
+            $memberWiseProfit = CashDetail::join('cash_sales', 'cash_details.cash_id', '=', 'cash_sales.id')
+                ->selectRaw('cash_sales.member_id, SUM(COALESCE(cash_details.total_product_profiit, 0)) as total_profit')
+                ->when($member_id, function ($query) use ($member_id) {
+                    return $query->where('cash_sales.member_id', $member_id);
+                })
+                ->groupBy('cash_sales.member_id')
+                ->get();
+
+            // Calculate SUM(total_product_profiit) per branch_group_id
+
+            if ($branch_group_id) {
+                $cashSalesQuery->whereHas('cashSales.member.branchGroup', function ($query) use ($branch_group_id) {
+                    $query->where('id', $branch_group_id);
+                });
+            }
+
+
+            if ($branch_group_id) {
+                $cashSalesQuery->whereHas('cashSales.member.branchGroup', function ($query) use ($branch_group_id) {
+                    $query->where('id', $branch_group_id);
+                });
+            }
+
+
+            if ($branch_id) {
+                $cashSalesQuery->whereHas('cashSales.member.branchGroup.employee.branchName', function ($query) use ($branch_id) {
+                    $query->where('id', $branch_id);
+                });
+            }
+
+            if ($form_date && $upto_date) {
+                // Filter sales records where invoice_date is between purchase_date and updated_at
+                $cashSalesQuery->whereBetween('created_at', [$form_date, $upto_date]);
+            }
+
+
+            // Execute the query to get product details
+            $cashSales = $cashSalesQuery->get();
+
+            return response()->json([
+                'cash_sell_details' => $cashSales,
+                'product_total_sell_income' => $productWiseProfit,
+                'member_wish_product_sell_income' => $memberWiseProfit,
+                // 'branch_wish_total_sell_income' => $branchWiseProfit
+            ]);
+        } else if ($sales_type_id == 2) {
+            $hirteSalesQuery = HireProductDetails::with('product', 'hireProductSale.member.branchGroup.employee.branchName');
+
+
+            if ($product_id) {
+                $hirteSalesQuery->whereHas('product', function ($query) use ($product_id) {
+                    $query->where('id', $product_id);
+                });
+            }
+
+            // Get sum of total_product_profiit grouped by product_id
+            $productWiseProfit = HireProductDetails::selectRaw('product_id, SUM(COALESCE(total_product_profit, 0)) as total_profit')
+                ->when($product_id, function ($query) use ($product_id) {
+                    return $query->where('product_id', $product_id);
+                })
+                ->groupBy('product_id')
+                ->get();
+
+            if ($member_id) {
+                $hirteSalesQuery->whereHas('hireProductSale.member', function ($query) use ($member_id) {
+                    $query->where('id', $member_id);
+                });
+            }
+
+            // Calculate SUM(total_product_profiit) per member_id, handling NULL values
+
+
+            // Calculate SUM(total_product_profiit) per branch_group_id
+
+            if ($branch_group_id) {
+                $hirteSalesQuery->whereHas('hireProductSale.member.branchGroup', function ($query) use ($branch_group_id) {
+                    $query->where('id', $branch_group_id);
+                });
+            }
+
+
+            if ($branch_group_id) {
+                $hirteSalesQuery->whereHas('hireProductSale.member.branchGroup', function ($query) use ($branch_group_id) {
+                    $query->where('id', $branch_group_id);
+                });
+            }
+
+
+            if ($branch_id) {
+                $hirteSalesQuery->whereHas('hireProductSale.member.branchGroup.employee.branchName', function ($query) use ($branch_id) {
+                    $query->where('id', $branch_id);
+                });
+            }
+
+            if ($form_date && $upto_date) {
+                // Filter sales records where invoice_date is between purchase_date and updated_at
+                $hirteSalesQuery->whereBetween('created_at', [$form_date, $upto_date]);
+            }
+
+
+
+            $hireSells = $hirteSalesQuery->get();
+
+            return response()->json([
+                'hire_sell_details' => $hireSells,
+                'product_total_sell_income' => $productWiseProfit,
+
+
+            ]);
+        } else if ($sales_type_id == 3) {
+
+            $wholeSalesQuery = WholeProductSalesDetail::with('product', 'wholeProductSale.wholeSalier');
+
+
+            if ($product_id) {
+                $wholeSalesQuery->whereHas('product', function ($query) use ($product_id) {
+                    $query->where('id', $product_id);
+                });
+            }
+
+            // Get sum of total_product_profiit grouped by product_id
+            $productWiseProfit = WholeProductSalesDetail::selectRaw('product_id, SUM(COALESCE(total_product_profit, 0)) as total_profit')
+                ->when($product_id, function ($query) use ($product_id) {
+                    return $query->where('product_id', $product_id);
+                })
+                ->groupBy('product_id')
+                ->get();
+
+
+                if ($form_date && $upto_date) {
+                    // Filter sales records where invoice_date is between purchase_date and updated_at
+                    $wholeSalesQuery->whereBetween('created_at', [$form_date, $upto_date]);
+                }
+
+
+
+
+
+
+            $wholeSells = $wholeSalesQuery->get();
+
+
+            return response()->json([
+                'whole_sell_details' => $wholeSells,
+                'product_total_sell_income' => $productWiseProfit,
+
+
+            ]);
+        }
+
+        return response()->json(['message' => 'Invalid Sales Type'], 400);
+    }
 }

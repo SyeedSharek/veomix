@@ -9,10 +9,12 @@ class CashDetail extends Model
     protected $guarded = [];
 
     public function cashSales(){
-        return $this->belongsToMany(CashSale::class, 'cash_id');
+        return $this->belongsTo(CashSale::class, 'cash_id');
     }
 
     public function product(){
         return $this->belongsTo(Product::class,'product_id');
     }
+
+
 }

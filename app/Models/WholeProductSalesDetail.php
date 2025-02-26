@@ -9,7 +9,7 @@ class WholeProductSalesDetail extends Model
     protected $guarded = [];
 
     public function wholeProductSale(){
-        return $this->belongsTo(WholeProductSale::class,'whole_product_sale_id');
+        return $this->belongsTo(WholeProductSale::class,'whole_product_sales_id');
     }
 
     public function product(){

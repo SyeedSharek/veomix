@@ -638,6 +638,24 @@ Route::post('/ledger/list/filter',[LedgerTransactionController::class,'ledgerRep
 
  // Ledger Report List
  Route::post('/ledger/report/list',[LedgerTransactionController::class,'ledgerReportList']);
+// Receive & Payment Report
+Route::post('/ledger/report/payment/list',[LedgerTransactionController::class,'ledgerReportPaymentList']);
+
+// Balance Sheet
+Route::post('/ledger/balanceSheet/list',[LedgerTransactionController::class,'ledgerBalanceSheetList']);
+
+//income and expense list
+Route::post('/ledger/income/expense/list',[LedgerTransactionController::class,'ledgerIncomeExpenseList']);
+
+// Profit And Loss List
+Route::post('/profit/loss/report/list',[CashSalesController::class,'profitLossReport']);
+
+
+
+
+
+
+
 
 
 

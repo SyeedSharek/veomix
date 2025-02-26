@@ -563,7 +563,7 @@ class LedgerTransactionController extends Controller
 
             // If ledger_id exists in credit report, fetch CreditAccount
             elseif (in_array($ledger_id, $credit_report)) {
-                $query = CreditAccount::with('ledgerTransaction.accountTransactionLedger','member.branchGroup.employee.branchName','supplier')
+                $query = CreditAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier')
                     ->whereHas('ledgerTransaction', function ($q) use ($ledger_id) {
                         $q->where('transaction_ledger_id', $ledger_id);
                     });
@@ -575,10 +575,14 @@ class LedgerTransactionController extends Controller
                 }
 
                 if (!empty($branch_id)) {
-                    $query->whereHas('member.branchGroup.employee.branchName', function ($q) use ($reporting_id) {
-                        $q->where('accounting_reporting_id', $$branch_id);
+                    $query->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+                        $q->where('id', $branch_id);
                     });
                 }
+
+
+
+
 
                 // Apply date filter correctly
                 if (!empty($created_at) && !empty($upto_date)) {
@@ -631,7 +635,7 @@ class LedgerTransactionController extends Controller
             //         $q->where('accounting_reporting_id', $reporting_id);
             //     })->orWhere('transaction_report_id', $reporting_id);
 
-            $credit_query = CreditAccount::with('ledgerTransaction.accountTransactionLedger','member.branchGroup.employee.branchName','supplier')
+            $credit_query = CreditAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier')
                 ->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
                     $q->where('accounting_reporting_id', $reporting_id);
                 })->orWhere('transaction_report_id', $reporting_id);
@@ -721,220 +725,793 @@ class LedgerTransactionController extends Controller
     }
 
 
-//     public function ledgerReportList(Request $request)
-// {
-//     if (!Auth::check()) {
-//         return response()->json(['error' => 'Unauthorized'], 401);
-//     }
+    //     public function ledgerReportList(Request $request)
+    // {
+    //     if (!Auth::check()) {
+    //         return response()->json(['error' => 'Unauthorized'], 401);
+    //     }
 
-//     $reporting_id = $request->input('reporting_id');
-//     $ledger_id    = $request->input('ledger_id');
-//     $created_at   = $request->input('created_at');
-//     $upto_date    = $request->input('upto_date');
+    //     $reporting_id = $request->input('reporting_id');
+    //     $ledger_id    = $request->input('ledger_id');
+    //     $created_at   = $request->input('created_at');
+    //     $upto_date    = $request->input('upto_date');
 
-//     if (empty($ledger_id) && empty($reporting_id)) {
-//         return response()->json(['error' => 'Missing search parameters'], 400);
-//     }
+    //     if (empty($ledger_id) && empty($reporting_id)) {
+    //         return response()->json(['error' => 'Missing search parameters'], 400);
+    //     }
 
-//     // Define debit and credit ledger categories.
-//     $debit_report  = [2, 3, 8];
-//     $credit_report = [1, 4, 5, 6, 7];
+    //     // Define debit and credit ledger categories.
+    //     $debit_report  = [2, 3, 8];
+    //     $credit_report = [1, 4, 5, 6, 7];
 
-//     // Initialize the result variable
-//     $result = [];
+    //     // Initialize the result variable
+    //     $result = [];
 
-//     if (!empty($ledger_id)) {
-//         // Check if the ledger_id exists in debit_report
-//         if (in_array($ledger_id, $debit_report)) {
-//             $query = DebitAccount::with('ledgerTransaction.accountTransactionLedger')
-//                 ->whereHas('ledgerTransaction', function ($q) use ($ledger_id) {
-//                     $q->where('transaction_ledger_id', $ledger_id);
-//                 });
+    //     if (!empty($ledger_id)) {
+    //         // Check if the ledger_id exists in debit_report
+    //         if (in_array($ledger_id, $debit_report)) {
+    //             $query = DebitAccount::with('ledgerTransaction.accountTransactionLedger')
+    //                 ->whereHas('ledgerTransaction', function ($q) use ($ledger_id) {
+    //                     $q->where('transaction_ledger_id', $ledger_id);
+    //                 });
 
-//             // Apply reporting_id condition if provided
-//             if (!empty($reporting_id)) {
-//                 $query->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
-//                     $q->where('accounting_reporting_id', $reporting_id);
-//                 })->orWhere('transaction_report_id', $reporting_id);
-//             }
+    //             // Apply reporting_id condition if provided
+    //             if (!empty($reporting_id)) {
+    //                 $query->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
+    //                     $q->where('accounting_reporting_id', $reporting_id);
+    //                 })->orWhere('transaction_report_id', $reporting_id);
+    //             }
 
-//             // Apply date filter if provided
-//             if (!empty($created_at) && !empty($upto_date)) {
-//                 $query->whereBetween('created_at', [
-//                     $created_at . " 00:00:00",
-//                     $upto_date . " 23:59:59"
-//                 ]);
-//             }
+    //             // Apply date filter if provided
+    //             if (!empty($created_at) && !empty($upto_date)) {
+    //                 $query->whereBetween('created_at', [
+    //                     $created_at . " 00:00:00",
+    //                     $upto_date . " 23:59:59"
+    //                 ]);
+    //             }
 
-//             $debit_account = $query->get();
+    //             $debit_account = $query->get();
 
-//             // Calculate debit account totals
-//             $transaction_amount = $query->sum('transaction_amount');
-//             $total_product_purchase_amount = $query->sum('total_product_purchase_amount');
-//             $total_due_product_amount = $query->sum('due_product_amount');
-//             $return_amount = $query->sum('return_amount');
+    //             // Calculate debit account totals
+    //             $transaction_amount = $query->sum('transaction_amount');
+    //             $total_product_purchase_amount = $query->sum('total_product_purchase_amount');
+    //             $total_due_product_amount = $query->sum('due_product_amount');
+    //             $return_amount = $query->sum('return_amount');
 
-//             $total_all_debit_amount = $transaction_amount + $total_product_purchase_amount + $total_due_product_amount + $return_amount;
+    //             $total_all_debit_amount = $transaction_amount + $total_product_purchase_amount + $total_due_product_amount + $return_amount;
 
-//             $result = [
-//                 'debit_ledger_report'  => $debit_account,
-//                 'transaction_amount' => $transaction_amount,
-//                 'total_product_purchase_amount' => $total_product_purchase_amount,
-//                 'total_due_product_amount' => $total_due_product_amount,
-//                 'return_amount' => $return_amount,
-//                 'total_all_debit_amount' => $total_all_debit_amount,
-//             ];
-//         }
-//         // Check if the ledger_id exists in credit_report
-//         elseif (in_array($ledger_id, $credit_report)) {
-//             $query = CreditAccount::with('ledgerTransaction.accountTransactionLedger','member','supplier')
-//                 ->whereHas('ledgerTransaction', function ($q) use ($ledger_id) {
-//                     $q->where('transaction_ledger_id', $ledger_id);
-//                 });
+    //             $result = [
+    //                 'debit_ledger_report'  => $debit_account,
+    //                 'transaction_amount' => $transaction_amount,
+    //                 'total_product_purchase_amount' => $total_product_purchase_amount,
+    //                 'total_due_product_amount' => $total_due_product_amount,
+    //                 'return_amount' => $return_amount,
+    //                 'total_all_debit_amount' => $total_all_debit_amount,
+    //             ];
+    //         }
+    //         // Check if the ledger_id exists in credit_report
+    //         elseif (in_array($ledger_id, $credit_report)) {
+    //             $query = CreditAccount::with('ledgerTransaction.accountTransactionLedger','member','supplier')
+    //                 ->whereHas('ledgerTransaction', function ($q) use ($ledger_id) {
+    //                     $q->where('transaction_ledger_id', $ledger_id);
+    //                 });
 
-//             // Apply reporting_id condition if provided
-//             if (!empty($reporting_id)) {
-//                 $query->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
-//                     $q->where('accounting_reporting_id', $reporting_id);
-//                 })->orWhere('transaction_report_id', $reporting_id);
-//             }
+    //             // Apply reporting_id condition if provided
+    //             if (!empty($reporting_id)) {
+    //                 $query->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
+    //                     $q->where('accounting_reporting_id', $reporting_id);
+    //                 })->orWhere('transaction_report_id', $reporting_id);
+    //             }
 
-//             // Apply date filter if provided
-//             if (!empty($created_at) && !empty($upto_date)) {
-//                 $query->whereBetween('created_at', [
-//                     $created_at . " 00:00:00",
-//                     $upto_date . " 23:59:59"
-//                 ]);
-//             }
+    //             // Apply date filter if provided
+    //             if (!empty($created_at) && !empty($upto_date)) {
+    //                 $query->whereBetween('created_at', [
+    //                     $created_at . " 00:00:00",
+    //                     $upto_date . " 23:59:59"
+    //                 ]);
+    //             }
 
-//             $credit_account = $query->get();
+    //             $credit_account = $query->get();
 
-//             // Calculate credit account totals
-//             $transaction_account = $query->sum('transaction_account');
-//             $admission_fee = $query->sum('admission_fee');
-//             $other_fee = $query->sum('other_fee');
-//             $return_amount = $query->sum('return_amount');
-//             $damage_amount = $query->sum('damage_amount');
-//             $cash_sales_amount = $query->sum('cash_sales_amount');
-//             $whole_sales_amount = $query->sum('whole_sales_amount');
-//             $hire_sales_amount = $query->sum('hire_sales_amount');
+    //             // Calculate credit account totals
+    //             $transaction_account = $query->sum('transaction_account');
+    //             $admission_fee = $query->sum('admission_fee');
+    //             $other_fee = $query->sum('other_fee');
+    //             $return_amount = $query->sum('return_amount');
+    //             $damage_amount = $query->sum('damage_amount');
+    //             $cash_sales_amount = $query->sum('cash_sales_amount');
+    //             $whole_sales_amount = $query->sum('whole_sales_amount');
+    //             $hire_sales_amount = $query->sum('hire_sales_amount');
 
-//             $total_all_credit_amount = $transaction_account + $admission_fee
-//                 + $other_fee + $return_amount + $damage_amount + $cash_sales_amount
-//                 + $whole_sales_amount + $hire_sales_amount;
+    //             $total_all_credit_amount = $transaction_account + $admission_fee
+    //                 + $other_fee + $return_amount + $damage_amount + $cash_sales_amount
+    //                 + $whole_sales_amount + $hire_sales_amount;
 
-//             $result = [
-//                 'credit_ledger_report' => $credit_account,
-//                 'transaction_account' => $transaction_account,
-//                 'admission_fee'  => $admission_fee,
-//                 'other_fee' => $other_fee,
-//                 'return_amount' => $return_amount,
-//                 'damage_amount' => $damage_amount,
-//                 'cash_sales_amount' => $cash_sales_amount,
-//                 'whole_sales_amount' => $whole_sales_amount,
-//                 'hire_sales_amount' => $hire_sales_amount,
-//                 'total_all_credit_amount' => $total_all_credit_amount
-//             ];
-//         }
-//         // If neither debit nor credit
-//         else {
-//             return response()->json(['error' => 'Invalid ledger_id'], 400);
-//         }
-//     }
+    //             $result = [
+    //                 'credit_ledger_report' => $credit_account,
+    //                 'transaction_account' => $transaction_account,
+    //                 'admission_fee'  => $admission_fee,
+    //                 'other_fee' => $other_fee,
+    //                 'return_amount' => $return_amount,
+    //                 'damage_amount' => $damage_amount,
+    //                 'cash_sales_amount' => $cash_sales_amount,
+    //                 'whole_sales_amount' => $whole_sales_amount,
+    //                 'hire_sales_amount' => $hire_sales_amount,
+    //                 'total_all_credit_amount' => $total_all_credit_amount
+    //             ];
+    //         }
+    //         // If neither debit nor credit
+    //         else {
+    //             return response()->json(['error' => 'Invalid ledger_id'], 400);
+    //         }
+    //     }
 
-//     // If no ledger_id but reporting_id exists, fetch both debit and credit reports
-//     elseif (!empty($reporting_id)) {
-//         // Similar to the previous logic, fetch both reports based on reporting_id
-//         $debit_query = DebitAccount::with('ledgerTransaction.accountTransactionLedger')
-//             ->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
-//                 $q->where('accounting_reporting_id', $reporting_id);
-//             })->orWhere('transaction_report_id', $reporting_id);
+    //     // If no ledger_id but reporting_id exists, fetch both debit and credit reports
+    //     elseif (!empty($reporting_id)) {
+    //         // Similar to the previous logic, fetch both reports based on reporting_id
+    //         $debit_query = DebitAccount::with('ledgerTransaction.accountTransactionLedger')
+    //             ->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
+    //                 $q->where('accounting_reporting_id', $reporting_id);
+    //             })->orWhere('transaction_report_id', $reporting_id);
 
-//         $credit_query = CreditAccount::with('ledgerTransaction.accountTransactionLedger')
-//             ->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
-//                 $q->where('accounting_reporting_id', $reporting_id);
-//             })->orWhere('transaction_report_id', $reporting_id);
+    //         $credit_query = CreditAccount::with('ledgerTransaction.accountTransactionLedger')
+    //             ->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_id) {
+    //                 $q->where('accounting_reporting_id', $reporting_id);
+    //             })->orWhere('transaction_report_id', $reporting_id);
 
-//         // Apply date filters for both queries
-//         if (!empty($created_at) && !empty($upto_date)) {
-//             $debit_query->whereBetween('created_at', [
-//                 $created_at . " 00:00:00",
-//                 $upto_date . " 23:59:59"
-//             ]);
+    //         // Apply date filters for both queries
+    //         if (!empty($created_at) && !empty($upto_date)) {
+    //             $debit_query->whereBetween('created_at', [
+    //                 $created_at . " 00:00:00",
+    //                 $upto_date . " 23:59:59"
+    //             ]);
 
-//             $credit_query->whereBetween('created_at', [
-//                 $created_at . " 00:00:00",
-//                 $upto_date . " 23:59:59"
-//             ]);
-//         }
+    //             $credit_query->whereBetween('created_at', [
+    //                 $created_at . " 00:00:00",
+    //                 $upto_date . " 23:59:59"
+    //             ]);
+    //         }
 
-//         // For Debit Account
-//         $debit_account = $debit_query->get();
-//         $transaction_amount = $debit_query->sum('transaction_amount');
-//         $total_product_purchase_amount = $debit_query->sum('total_product_purchase_amount');
-//         $total_due_product_amount = $debit_query->sum('due_product_amount');
-//         $return_amount = $debit_query->sum('return_amount');
-//         $total_all_debit_amount = $transaction_amount + $total_product_purchase_amount + $total_due_product_amount + $return_amount;
+    //         // For Debit Account
+    //         $debit_account = $debit_query->get();
+    //         $transaction_amount = $debit_query->sum('transaction_amount');
+    //         $total_product_purchase_amount = $debit_query->sum('total_product_purchase_amount');
+    //         $total_due_product_amount = $debit_query->sum('due_product_amount');
+    //         $return_amount = $debit_query->sum('return_amount');
+    //         $total_all_debit_amount = $transaction_amount + $total_product_purchase_amount + $total_due_product_amount + $return_amount;
 
-//         // For Credit Account
-//         $credit_account = $credit_query->get();
-//         $transaction_account = $credit_query->sum('transaction_account');
-//         $admission_fee = $credit_query->sum('admission_fee');
-//         $other_fee = $credit_query->sum('other_fee');
-//         $return_amount = $credit_query->sum('return_amount');
-//         $damage_amount = $credit_query->sum('damage_amount');
-//         $cash_sales_amount = $credit_query->sum('cash_sales_amount');
-//         $whole_sales_amount = $credit_query->sum('whole_sales_amount');
-//         $hire_sales_amount = $credit_query->sum('hire_sales_amount');
-//         $total_all_credit_amount = $transaction_account + $admission_fee + $other_fee + $return_amount + $damage_amount + $cash_sales_amount + $whole_sales_amount + $hire_sales_amount;
-
-
-//         if($credit_query){
-//             return response()->json([
-//                                 'credit_ledger_report' => $credit_account,
-//                                 'transaction_account' => $transaction_account,
-//                                 'admission_fee'  => $admission_fee,
-//                                 'other_fee' => $other_fee,
-//                                 'return_amount' => $return_amount,
-//                                 'damage_amount' => $damage_amount,
-//                                 'cash_sales_amount' => $cash_sales_amount,
-//                                 'whole_sales_amount' => $whole_sales_amount,
-//                                 'hire_sales_amount' => $hire_sales_amount,
-//                                 'total_all_credit_amount' => $total_all_credit_amount
-//                             ]);
-
-//         }
+    //         // For Credit Account
+    //         $credit_account = $credit_query->get();
+    //         $transaction_account = $credit_query->sum('transaction_account');
+    //         $admission_fee = $credit_query->sum('admission_fee');
+    //         $other_fee = $credit_query->sum('other_fee');
+    //         $return_amount = $credit_query->sum('return_amount');
+    //         $damage_amount = $credit_query->sum('damage_amount');
+    //         $cash_sales_amount = $credit_query->sum('cash_sales_amount');
+    //         $whole_sales_amount = $credit_query->sum('whole_sales_amount');
+    //         $hire_sales_amount = $credit_query->sum('hire_sales_amount');
+    //         $total_all_credit_amount = $transaction_account + $admission_fee + $other_fee + $return_amount + $damage_amount + $cash_sales_amount + $whole_sales_amount + $hire_sales_amount;
 
 
-//         // if($debit_query){
+    //         if($credit_query){
+    //             return response()->json([
+    //                                 'credit_ledger_report' => $credit_account,
+    //                                 'transaction_account' => $transaction_account,
+    //                                 'admission_fee'  => $admission_fee,
+    //                                 'other_fee' => $other_fee,
+    //                                 'return_amount' => $return_amount,
+    //                                 'damage_amount' => $damage_amount,
+    //                                 'cash_sales_amount' => $cash_sales_amount,
+    //                                 'whole_sales_amount' => $whole_sales_amount,
+    //                                 'hire_sales_amount' => $hire_sales_amount,
+    //                                 'total_all_credit_amount' => $total_all_credit_amount
+    //                             ]);
 
-//         //     return response()->json([
-
-//         //                         'debit_ledger_report'  => $debit_account,
-//         //                         'transaction_amount' => $transaction_amount,
-//         //                         'total_product_purchase_amount' => $total_product_purchase_amount,
-//         //                         'total_due_product_amount' => $total_due_product_amount,
-//         //                         'return_amount' => $return_amount,
-//         //                         'total_all_debit_amount' => $total_all_debit_amount,
+    //         }
 
 
+    //         // if($debit_query){
 
-//         //                     ]);
+    //         //     return response()->json([
 
-//         // }
+    //         //                         'debit_ledger_report'  => $debit_account,
+    //         //                         'transaction_amount' => $transaction_amount,
+    //         //                         'total_product_purchase_amount' => $total_product_purchase_amount,
+    //         //                         'total_due_product_amount' => $total_due_product_amount,
+    //         //                         'return_amount' => $return_amount,
+    //         //                         'total_all_debit_amount' => $total_all_debit_amount,
 
 
-//         return response()->json([
-//             'debit_ledger_report'  => $debit_account,
-//             'credit_ledger_report' => $credit_account,
-//             'total_all_debit_amount' => $total_all_debit_amount,
-//             'total_all_credit_amount' => $total_all_credit_amount
-//         ]);
-//     }
 
-//     // If no ledger_id and reporting_id is missing
-//     return response()->json(['error' => 'Missing search parameters'], 400);
-// }
+    //         //                     ]);
+
+    //         // }
+
+
+    //         return response()->json([
+    //             'debit_ledger_report'  => $debit_account,
+    //             'credit_ledger_report' => $credit_account,
+    //             'total_all_debit_amount' => $total_all_debit_amount,
+    //             'total_all_credit_amount' => $total_all_credit_amount
+    //         ]);
+    //     }
+
+    //     // If no ledger_id and reporting_id is missing
+    //     return response()->json(['error' => 'Missing search parameters'], 400);
+    // }
+
+
+    //     public function ledgerReportPaymentList(Request $request)
+    // {
+    //     if (!Auth::check()) {
+    //         return response()->json([
+    //             'error' => 'Unauthenticated'
+    //         ], 401);
+    //     }
+
+    //     $reporting_date = $request->input('reporting_date');
+    //     $reporting_type = $request->input('reporting_type');
+    //     $branch_id = $request->input('branch_id');
+    //     $ledger_id = $request->input('ledger_id'); // Ensure ledger_id is retrieved from request
+
+    //     $debit_report  = [2, 3, 8];
+    //     $credit_report = [1, 4, 5, 6, 7];
+
+    //     // Check if the report type belongs to debit report
+    //     if (in_array($reporting_type, $debit_report)) {
+    //         $query = DebitAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+    //         if (!empty($reporting_type)) {
+    //             $query->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_type) {
+    //                 $q->where('accounting_reporting_id', $reporting_type);
+    //             })->orWhere('transaction_report_id', $reporting_type);
+    //         }
+
+    //         if (!empty($reporting_date)) {
+    //             $query->whereDate('created_at', $reporting_date);
+    //         }
+
+    //         if (!empty($branch_id)) {
+    //             $query->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+    //                 $q->where('id', $branch_id);
+    //             });
+    //         }
+
+    //         return response()->json($query->get());
+
+
+
+    //         $transaction_amount = $query->sum('transaction_amount');
+    //                 $total_product_purchase_amount = $query->sum('total_product_purchase_amount');
+    //                 $total_due_product_amount = $query->sum('due_product_amount');
+    //                 $return_amount = $query->sum('return_amount');
+
+    //                 $total_all_debit_amount = $transaction_amount +
+    //                     $total_product_purchase_amount + $total_due_product_amount + $return_amount;
+
+
+
+
+    //                 return response()->json([
+    //                     'debit_ledger_report' => $debit_account,
+    //                     'transaction_amount' => $transaction_amount,
+    //                     'total_product_purchase_amount' => $total_product_purchase_amount,
+    //                     'total_due_product_amount' => $total_due_product_amount,
+    //                     'return_amount' => $return_amount,
+    //                     'total_all_debit_amount' => $total_all_debit_amount
+    //                 ]);
+
+
+
+
+    //     }
+
+    //     // Check if the report type belongs to credit report
+    //     if (in_array($reporting_type, $credit_report)) {
+    //         $query = CreditAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+    //         if (!empty($ledger_id)) {
+    //             $query->whereHas('ledgerTransaction', function ($q) use ($ledger_id) {
+    //                 $q->where('transaction_ledger_id', $ledger_id);
+    //             });
+    //         }
+
+    //         if (!empty($reporting_type)) {
+    //             $query->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_type) {
+    //                 $q->where('accounting_reporting_id', $reporting_type);
+    //             })->orWhere('transaction_report_id', $reporting_type);
+    //         }
+
+    //         if (!empty($reporting_date)) {
+    //             $query->whereDate('created_at', $reporting_date);
+    //         }
+
+    //         if (!empty($branch_id)) {
+    //             $query->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+    //                 $q->where('id', $branch_id);
+    //             });
+    //         }
+
+    //         return response()->json($query->get());
+
+
+
+    //         $transaction_account = $query->sum('transaction_account');
+    //                 $admission_fee = $query->sum('admission_fee');
+    //                 $other_fee = $query->sum('other_fee');
+    //                 $return_amount = $query->sum('return_amount');
+    //                 $damage_amount = $query->sum('damage_amount');
+    //                 $cash_sales_amount = $query->sum('cash_sales_amount');
+    //                 $whole_sales_amount = $query->sum('whole_sales_amount');
+    //                 $hire_sales_amount = $query->sum('hire_sales_amount');
+
+    //                 $total_all_credit_amount = $transaction_account + $admission_fee
+    //                     + $other_fee + $return_amount + $damage_amount + $cash_sales_amount
+    //                     + $whole_sales_amount + $hire_sales_amount;
+
+
+
+
+    //                 return response()->json([
+    //                     'credit_ledger_report' => $credit_account,
+    //                     'transaction_account' => $transaction_account,
+    //                     'admission_fee'  => $admission_fee,
+    //                     'other_fee' => $other_fee,
+    //                     'return_amount' => $return_amount,
+    //                     'damage_amount' => $damage_amount,
+    //                     'cash_sales_amount' => $cash_sales_amount,
+    //                     'whole_sales_amount' => $whole_sales_amount,
+    //                     'hire_sales_amount' => $hire_sales_amount,
+    //                     'total_all_credit_amount' => $total_all_credit_amount
+
+
+    //                 ]);
+    //     }
+
+    //     return response()->json([
+    //         'error' => 'Invalid reporting type'
+    //     ], 400);
+    // }
+
+
+    public function ledgerReportPaymentList(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'error' => 'Unauthenticated'
+            ], 401);
+        }
+
+        $reporting_date = $request->input('reporting_date');
+        $reporting_type = $request->input('reporting_type');
+        $branch_id = $request->input('branch_id');
+        $ledger_id = $request->input('ledger_id');
+
+        $debit_report  = [2, 3, 8];
+        $credit_report = [1, 4, 5, 6, 7];
+
+        // Check if the report type belongs to debit report
+        if (in_array($reporting_type, $debit_report)) {
+            $query = DebitAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+            if (!empty($reporting_type)) {
+                $query->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_type) {
+                    $q->where('accounting_reporting_id', $reporting_type);
+                })->orWhere('transaction_report_id', $reporting_type);
+            }
+
+            if (!empty($reporting_date)) {
+                $query->whereDate('created_at', $reporting_date);
+            }
+
+            if (!empty($branch_id)) {
+                $query->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+                    $q->where('id', $branch_id);
+                });
+            }
+
+            // Fetch results
+            $debit_account = $query->get();
+
+            // Perform calculations
+            $transaction_amount = $query->sum('transaction_amount');
+            $total_product_purchase_amount = $query->sum('total_product_purchase_amount');
+            $total_due_product_amount = $query->sum('due_product_amount');
+            $return_amount = $query->sum('return_amount');
+
+            $total_all_debit_amount = $transaction_amount +
+                $total_product_purchase_amount + $total_due_product_amount + $return_amount;
+
+            return response()->json([
+                'debit_ledger_report' => $debit_account,
+                'transaction_amount' => $transaction_amount,
+                'total_product_purchase_amount' => $total_product_purchase_amount,
+                'total_due_product_amount' => $total_due_product_amount,
+                'return_amount' => $return_amount,
+                'total_all_debit_amount' => $total_all_debit_amount
+            ]);
+        }
+
+        // Check if the report type belongs to credit report
+        if (in_array($reporting_type, $credit_report)) {
+            $query = CreditAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+            if (!empty($ledger_id)) {
+                $query->whereHas('ledgerTransaction', function ($q) use ($ledger_id) {
+                    $q->where('transaction_ledger_id', $ledger_id);
+                });
+            }
+
+            if (!empty($reporting_type)) {
+                $query->whereHas('ledgerTransaction.accountTransactionLedger', function ($q) use ($reporting_type) {
+                    $q->where('accounting_reporting_id', $reporting_type);
+                })->orWhere('transaction_report_id', $reporting_type);
+            }
+
+            if (!empty($reporting_date)) {
+                $query->whereDate('created_at', $reporting_date);
+            }
+
+            if (!empty($branch_id)) {
+                $query->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+                    $q->where('id', $branch_id);
+                });
+            }
+
+            // Fetch results
+            $credit_account = $query->get();
+
+            // Perform calculations
+            $transaction_account = $query->sum('transaction_amount'); // Ensure correct field name
+            $admission_fee = $query->sum('admission_fee');
+            $other_fee = $query->sum('other_fee');
+            $return_amount = $query->sum('return_amount');
+            $damage_amount = $query->sum('damage_amount');
+            $cash_sales_amount = $query->sum('cash_sales_amount');
+            $whole_sales_amount = $query->sum('whole_sales_amount');
+            $hire_sales_amount = $query->sum('hire_sales_amount');
+
+            $total_all_credit_amount = $transaction_account + $admission_fee
+                + $other_fee + $return_amount + $damage_amount + $cash_sales_amount
+                + $whole_sales_amount + $hire_sales_amount;
+
+            return response()->json([
+                'credit_ledger_report' => $credit_account,
+                'transaction_account' => $transaction_account,
+                'admission_fee'  => $admission_fee,
+                'other_fee' => $other_fee,
+                'return_amount' => $return_amount,
+                'damage_amount' => $damage_amount,
+                'cash_sales_amount' => $cash_sales_amount,
+                'whole_sales_amount' => $whole_sales_amount,
+                'hire_sales_amount' => $hire_sales_amount,
+                'total_all_credit_amount' => $total_all_credit_amount
+            ]);
+        }
+
+        return response()->json([
+            'error' => 'Invalid reporting type'
+        ], 400);
+    }
+
+
+
+
+
+    // public function ledgerBalanceSheetList(Request $request)
+    // {
+    //     if (!Auth::check()) {
+    //         return response()->json([
+    //             'error' => 'Unauthenticated'
+    //         ], 401);
+    //     }
+
+    //     $reporting_date = $request->reporting_date;
+    //     $branch_group = $request->branch_group;
+    //     $branch_id = $request->branch_id;
+
+    //     // Fetch Debit Account Data
+    //     $debitQuery = DebitAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+    //     if (!empty($reporting_date)) {
+    //         $debitQuery->whereDate('created_at', $reporting_date);
+    //     }
+
+    //     if (!empty($branch_id)) {
+    //         $debitQuery->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+    //             $q->where('id', $branch_id);
+    //         });
+    //     }
+
+    //     if (!empty($branch_group)) {
+    //         $debitQuery->whereHas('member.branchGroup', function ($q) use ($branch_group) {
+    //             $q->where('id', $branch_group);
+    //         });
+    //     }
+
+    //     $debitAccounts = $debitQuery->get(); // Execute query
+
+    //     $transaction_amount = $debitQuery->sum('transaction_amount');
+    //         $total_product_purchase_amount = $debitQuery->sum('total_product_purchase_amount');
+    //         $total_due_product_amount = $debitQuery->sum('due_product_amount');
+    //         $return_amount = $debitQuery->sum('return_amount');
+
+    //         $total_all_debit_amount = $transaction_amount +
+    //             $total_product_purchase_amount + $total_due_product_amount + $return_amount;
+
+    //         return response()->json([
+    //             'debit_ledger_report' => $debitAccounts,
+    //             'transaction_amount' => $transaction_amount,
+    //             'total_product_purchase_amount' => $total_product_purchase_amount,
+    //             'total_due_product_amount' => $total_due_product_amount,
+    //             'return_amount' => $return_amount,
+    //             'total_all_debit_amount' => $total_all_debit_amount
+    //         ]);
+
+
+
+
+    //     // Fetch Credit Account Data
+    //     $creditQuery = CreditAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+    //     if (!empty($reporting_date)) {
+    //         $creditQuery->whereDate('created_at', $reporting_date);
+    //     }
+
+    //     if (!empty($branch_id)) {
+    //         $creditQuery->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+    //             $q->where('id', $branch_id);
+    //         });
+    //     }
+
+    //     if (!empty($branch_group)) {
+    //         $creditQuery->whereHas('member.branchGroup', function ($q) use ($branch_group) {
+    //             $q->where('id', $branch_group);
+    //         });
+    //     }
+
+    //     $creditAccounts = $creditQuery->get(); // Execute query
+
+    //     $transaction_account = $creditQuery->sum('transaction_amount'); // Ensure correct field name
+    //         $admission_fee = $creditQuery->sum('admission_fee');
+    //         $other_fee = $creditQuery->sum('other_fee');
+    //         $return_amount = $creditQuery->sum('return_amount');
+    //         $damage_amount = $creditQuery->sum('damage_amount');
+    //         $cash_sales_amount = $creditQuery->sum('cash_sales_amount');
+    //         $whole_sales_amount = $creditQuery->sum('whole_sales_amount');
+    //         $hire_sales_amount = $creditQuery->sum('hire_sales_amount');
+
+    //         $total_all_credit_amount = $transaction_account + $admission_fee
+    //             + $other_fee + $return_amount + $damage_amount + $cash_sales_amount
+    //             + $whole_sales_amount + $hire_sales_amount;
+
+    //         return response()->json([
+    //             'credit_ledger_report' => $creditAccounts,
+    //             'transaction_account' => $transaction_account,
+    //             'admission_fee'  => $admission_fee,
+    //             'other_fee' => $other_fee,
+    //             'return_amount' => $return_amount,
+    //             'damage_amount' => $damage_amount,
+    //             'cash_sales_amount' => $cash_sales_amount,
+    //             'whole_sales_amount' => $whole_sales_amount,
+    //             'hire_sales_amount' => $hire_sales_amount,
+    //             'total_all_credit_amount' => $total_all_credit_amount
+    //         ]);
+
+
+
+
+    //     // Return both Debit and Credit Data
+    //     // return response()->json([
+    //     //     'debit_accounts' => $debitAccounts,
+    //     //     'credit_accounts' => $creditAccounts,
+    //     // ]);
+    // }
+
+
+    public function ledgerBalanceSheetList(Request $request)
+{
+    if (!Auth::check()) {
+        return response()->json([
+            'error' => 'Unauthenticated'
+        ], 401);
+    }
+
+    $reporting_date = $request->reporting_date;
+    $branch_group = $request->branch_group;
+    $branch_id = $request->branch_id;
+
+    // Fetch Debit Account Data
+    $debitQuery = DebitAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+    if (!empty($reporting_date)) {
+        $debitQuery->whereDate('created_at', $reporting_date);
+    }
+
+    if (!empty($branch_id)) {
+        $debitQuery->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+            $q->where('id', $branch_id);
+        });
+    }
+
+    if (!empty($branch_group)) {
+        $debitQuery->whereHas('member.branchGroup', function ($q) use ($branch_group) {
+            $q->where('id', $branch_group);
+        });
+    }
+
+    $debitAccounts = $debitQuery->get(); // Execute query
+
+    // Calculate Debit Account Totals
+    $debit_transaction_amount = $debitQuery->sum('transaction_amount');
+            $debit_total_product_purchase_amount = $debitQuery->sum('total_product_purchase_amount');
+            $debit_total_due_product_amount = $debitQuery->sum('due_product_amount');
+            $debit_return_amount = $debitQuery->sum('return_amount');
+
+            $debit_total_all_debit_amount = $debit_transaction_amount +
+                $debit_total_product_purchase_amount + $debit_total_due_product_amount + $debit_return_amount;
+    // Fetch Credit Account Data
+    $creditQuery = CreditAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+    if (!empty($reporting_date)) {
+        $creditQuery->whereDate('created_at', $reporting_date);
+    }
+
+    if (!empty($branch_id)) {
+        $creditQuery->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+            $q->where('id', $branch_id);
+        });
+    }
+
+    if (!empty($branch_group)) {
+        $creditQuery->whereHas('member.branchGroup', function ($q) use ($branch_group) {
+            $q->where('id', $branch_group);
+        });
+    }
+
+    $creditAccounts = $creditQuery->get(); // Execute query
+
+    // Calculate Credit Account Totals
+    $transaction_account = $creditQuery->sum('transaction_account'); // Ensure correct field name
+    $admission_fee = $creditQuery->sum('admission_fee');
+    $other_fee = $creditQuery->sum('other_fee');
+    $credit_return_amount = $creditQuery->sum('return_amount');
+    $damage_amount = $creditQuery->sum('damage_amount');
+    $cash_sales_amount = $creditQuery->sum('cash_sales_amount');
+    $whole_sales_amount = $creditQuery->sum('whole_sales_amount');
+    $hire_sales_amount = $creditQuery->sum('hire_sales_amount');
+
+    $total_all_credit_amount = $transaction_account + $admission_fee
+        + $other_fee + $credit_return_amount + $damage_amount + $cash_sales_amount
+        + $whole_sales_amount + $hire_sales_amount;
+
+    // Return both Debit and Credit Data in a single response
+    return response()->json([
+        'debit_ledger_report' => $debitAccounts,
+        'debit_transaction_amount' => $debit_transaction_amount,
+        'debit_total_product_purchase_amount' => $debit_total_due_product_amount,
+        'debit_total_due_product_amount' => $debit_total_due_product_amount,
+        'debit_return_amount' => $debit_return_amount,
+        'debit_total_all_amount' => $debit_total_all_debit_amount,
+
+        'credit_ledger_report' => $creditAccounts,
+        'credit_transaction_account' => $transaction_account,
+        'credit_admission_fee' => $admission_fee,
+        'credit_other_fee' => $other_fee,
+        'credit_return_amount' => $credit_return_amount,
+        'damage_amount' => $damage_amount,
+        'cash_sales_amount' => $cash_sales_amount,
+        'whole_sales_amount' => $whole_sales_amount,
+        'hire_sales_amount' => $hire_sales_amount,
+        'total_all_credit_amount' => $total_all_credit_amount
+    ]);
+}
+
+
+
+
+public function ledgerIncomeExpenseList(Request $request){
+    if(Auth::check()){
+        $reporting_date = $request->input('reporting_date');
+        $branch_id = $request->input('branch_id');
+
+
+
+        $debitQuery = DebitAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+    if (!empty($reporting_date)) {
+        $debitQuery->whereDate('created_at', $reporting_date);
+    }
+
+    if (!empty($branch_id)) {
+        $debitQuery->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+            $q->where('id', $branch_id);
+        });
+    }
+
+
+
+    $creditQuery = CreditAccount::with('ledgerTransaction.accountTransactionLedger', 'member.branchGroup.employee.branchName', 'supplier');
+
+    if (!empty($reporting_date)) {
+        $creditQuery->whereDate('created_at', $reporting_date);
+    }
+
+    if (!empty($branch_id)) {
+        $creditQuery->whereHas('member.branchGroup.employee.branchName', function ($q) use ($branch_id) {
+            $q->where('id', $branch_id);
+        });
+    }
+
+    if (!empty($branch_group)) {
+        $creditQuery->whereHas('member.branchGroup', function ($q) use ($branch_group) {
+            $q->where('id', $branch_group);
+        });
+    }
+
+    $creditAccounts = $creditQuery->get(); // Execute query
+
+    // Calculate Credit Account Totals
+    $transaction_account = $creditQuery->sum('transaction_account'); // Ensure correct field name
+    $admission_fee = $creditQuery->sum('admission_fee');
+    $other_fee = $creditQuery->sum('other_fee');
+    $credit_return_amount = $creditQuery->sum('return_amount');
+    $damage_amount = $creditQuery->sum('damage_amount');
+    $cash_sales_amount = $creditQuery->sum('cash_sales_amount');
+    $whole_sales_amount = $creditQuery->sum('whole_sales_amount');
+    $hire_sales_amount = $creditQuery->sum('hire_sales_amount');
+
+
+    $cash_total_profit = $creditQuery->sum('cash_total_profit');
+    $whole_sales_total_profit = $creditQuery->sum('whole_sales_total_profit');
+    $hire_sales_total_profit = $creditQuery->sum('hire_sales_total_profit');
+
+
+
+    $total_all_credit_amount = $transaction_account + $admission_fee
+        + $other_fee + $credit_return_amount + $damage_amount + $cash_sales_amount
+        + $whole_sales_amount + $hire_sales_amount+$cash_total_profit +$whole_sales_total_profit
+        +$hire_sales_total_profit ;
+
+
+        return response()->json([
+
+            'credit_ledger_report' => $creditAccounts,
+            'credit_transaction_account' => $transaction_account,
+            'credit_admission_fee' => $admission_fee,
+            'credit_other_fee' => $other_fee,
+            'credit_return_amount' => $credit_return_amount,
+            'damage_amount' => $damage_amount,
+            'cash_sales_amount' => $cash_sales_amount,
+            'whole_sales_amount' => $whole_sales_amount,
+            'hire_sales_amount' => $hire_sales_amount,
+            'cash_total_profit' => $cash_total_profit,
+            'whole_sales_total_profit' => $whole_sales_total_profit,
+            'hire_sales_total_profit' => $hire_sales_total_profit,
+            'total_all_credit_amount' => $total_all_credit_amount,
+
+
+
+
+        ]);
+
+
+
+
+
+    }
+    else{
+        return response()->json([
+            'error' => 'Unathorized',
+        ]);
+    }
+}
+
+
+
+
+
+
 
 
 

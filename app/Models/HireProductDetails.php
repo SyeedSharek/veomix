@@ -9,7 +9,7 @@ class HireProductDetails extends Model
     protected $guarded = [];
 
     public function hireProductSale(){
-        return $this->hasMany(HireProductSale::class,'hire_product_sales_id');
+        return $this->belongsTo(HireProductSale::class,'hire_product_sales_id');
     }
 
     public function product(){
